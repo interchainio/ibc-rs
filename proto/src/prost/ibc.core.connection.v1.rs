@@ -118,6 +118,240 @@ pub struct GenesisState {
     #[prost(uint64, tag = "3")]
     pub next_connection_sequence: u64,
 }
+/// MsgConnectionOpenInit defines the msg sent by an account on Chain A to
+/// initialize a connection with Chain B.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenInit {
+    #[prost(string, tag = "1")]
+    pub client_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "2")]
+    pub counterparty: ::core::option::Option<Counterparty>,
+    #[prost(message, optional, tag = "3")]
+    pub version: ::core::option::Option<Version>,
+    #[prost(uint64, tag = "4")]
+    pub delay_period: u64,
+    #[prost(string, tag = "5")]
+    pub signer: ::prost::alloc::string::String,
+}
+/// MsgConnectionOpenInitResponse defines the Msg/ConnectionOpenInit response type.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenInitResponse {}
+/// MsgConnectionOpenTry defines a msg sent by a Relayer to try to open a
+/// connection on Chain B.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenTry {
+    #[prost(string, tag = "1")]
+    pub client_id: ::prost::alloc::string::String,
+    /// in the case of crossing hello's, when both chains call OpenInit, we need the connection identifier
+    /// of the previous connection in state INIT
+    #[prost(string, tag = "2")]
+    pub previous_connection_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "3")]
+    pub client_state: ::core::option::Option<::prost_types::Any>,
+    #[prost(message, optional, tag = "4")]
+    pub counterparty: ::core::option::Option<Counterparty>,
+    #[prost(uint64, tag = "5")]
+    pub delay_period: u64,
+    #[prost(message, repeated, tag = "6")]
+    pub counterparty_versions: ::prost::alloc::vec::Vec<Version>,
+    #[prost(message, optional, tag = "7")]
+    pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
+    /// proof of the initialization the connection on Chain A: `UNITIALIZED ->
+    /// INIT`
+    #[prost(bytes = "vec", tag = "8")]
+    pub proof_init: ::prost::alloc::vec::Vec<u8>,
+    /// proof of client state included in message
+    #[prost(bytes = "vec", tag = "9")]
+    pub proof_client: ::prost::alloc::vec::Vec<u8>,
+    /// proof of client consensus state
+    #[prost(bytes = "vec", tag = "10")]
+    pub proof_consensus: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, optional, tag = "11")]
+    pub consensus_height: ::core::option::Option<super::super::client::v1::Height>,
+    #[prost(string, tag = "12")]
+    pub signer: ::prost::alloc::string::String,
+}
+/// MsgConnectionOpenTryResponse defines the Msg/ConnectionOpenTry response type.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenTryResponse {}
+/// MsgConnectionOpenAck defines a msg sent by a Relayer to Chain A to
+/// acknowledge the change of connection state to TRYOPEN on Chain B.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenAck {
+    #[prost(string, tag = "1")]
+    pub connection_id: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub counterparty_connection_id: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "3")]
+    pub version: ::core::option::Option<Version>,
+    #[prost(message, optional, tag = "4")]
+    pub client_state: ::core::option::Option<::prost_types::Any>,
+    #[prost(message, optional, tag = "5")]
+    pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
+    /// proof of the initialization the connection on Chain B: `UNITIALIZED ->
+    /// TRYOPEN`
+    #[prost(bytes = "vec", tag = "6")]
+    pub proof_try: ::prost::alloc::vec::Vec<u8>,
+    /// proof of client state included in message
+    #[prost(bytes = "vec", tag = "7")]
+    pub proof_client: ::prost::alloc::vec::Vec<u8>,
+    /// proof of client consensus state
+    #[prost(bytes = "vec", tag = "8")]
+    pub proof_consensus: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, optional, tag = "9")]
+    pub consensus_height: ::core::option::Option<super::super::client::v1::Height>,
+    #[prost(string, tag = "10")]
+    pub signer: ::prost::alloc::string::String,
+}
+/// MsgConnectionOpenAckResponse defines the Msg/ConnectionOpenAck response type.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenAckResponse {}
+/// MsgConnectionOpenConfirm defines a msg sent by a Relayer to Chain B to
+/// acknowledge the change of connection state to OPEN on Chain A.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenConfirm {
+    #[prost(string, tag = "1")]
+    pub connection_id: ::prost::alloc::string::String,
+    /// proof for the change of the connection state on Chain A: `INIT -> OPEN`
+    #[prost(bytes = "vec", tag = "2")]
+    pub proof_ack: ::prost::alloc::vec::Vec<u8>,
+    #[prost(message, optional, tag = "3")]
+    pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
+    #[prost(string, tag = "4")]
+    pub signer: ::prost::alloc::string::String,
+}
+/// MsgConnectionOpenConfirmResponse defines the Msg/ConnectionOpenConfirm response type.
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct MsgConnectionOpenConfirmResponse {}
+#[doc = r" Generated client implementations."]
+pub mod msg_client {
+    #![allow(unused_variables, dead_code, missing_docs)]
+    use tonic::codegen::*;
+    #[doc = " Msg defines the ibc/connection Msg service."]
+    #[derive(Debug, Clone)]
+    pub struct MsgClient<T> {
+        inner: tonic::client::Grpc<T>,
+    }
+    impl MsgClient<tonic::transport::Channel> {
+        #[doc = r" Attempt to create a new client by connecting to a given endpoint."]
+        pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
+        where
+            D: std::convert::TryInto<tonic::transport::Endpoint>,
+            D::Error: Into<StdError>,
+        {
+            let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
+            Ok(Self::new(conn))
+        }
+    }
+    impl<T> MsgClient<T>
+    where
+        T: tonic::client::GrpcService<tonic::body::BoxBody>,
+        T::ResponseBody: Body + Send + Sync + 'static,
+        T::Error: Into<StdError>,
+        <T::ResponseBody as Body>::Error: Into<StdError> + Send,
+    {
+        pub fn new(inner: T) -> Self {
+            let inner = tonic::client::Grpc::new(inner);
+            Self { inner }
+        }
+        pub fn with_interceptor<F>(inner: T, interceptor: F) -> MsgClient<InterceptedService<T, F>>
+        where
+            F: FnMut(tonic::Request<()>) -> Result<tonic::Request<()>, tonic::Status>,
+            T: Service<
+                http::Request<tonic::body::BoxBody>,
+                Response = http::Response<
+                    <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
+                >,
+            >,
+            <T as Service<http::Request<tonic::body::BoxBody>>>::Error:
+                Into<StdError> + Send + Sync,
+        {
+            MsgClient::new(InterceptedService::new(inner, interceptor))
+        }
+        #[doc = r" Compress requests with `gzip`."]
+        #[doc = r""]
+        #[doc = r" This requires the server to support it otherwise it might respond with an"]
+        #[doc = r" error."]
+        pub fn send_gzip(mut self) -> Self {
+            self.inner = self.inner.send_gzip();
+            self
+        }
+        #[doc = r" Enable decompressing responses with `gzip`."]
+        pub fn accept_gzip(mut self) -> Self {
+            self.inner = self.inner.accept_gzip();
+            self
+        }
+        #[doc = " ConnectionOpenInit defines a rpc handler method for MsgConnectionOpenInit."]
+        pub async fn connection_open_init(
+            &mut self,
+            request: impl tonic::IntoRequest<super::MsgConnectionOpenInit>,
+        ) -> Result<tonic::Response<super::MsgConnectionOpenInitResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/ibc.core.connection.v1.Msg/ConnectionOpenInit",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " ConnectionOpenTry defines a rpc handler method for MsgConnectionOpenTry."]
+        pub async fn connection_open_try(
+            &mut self,
+            request: impl tonic::IntoRequest<super::MsgConnectionOpenTry>,
+        ) -> Result<tonic::Response<super::MsgConnectionOpenTryResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/ibc.core.connection.v1.Msg/ConnectionOpenTry",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " ConnectionOpenAck defines a rpc handler method for MsgConnectionOpenAck."]
+        pub async fn connection_open_ack(
+            &mut self,
+            request: impl tonic::IntoRequest<super::MsgConnectionOpenAck>,
+        ) -> Result<tonic::Response<super::MsgConnectionOpenAckResponse>, tonic::Status> {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/ibc.core.connection.v1.Msg/ConnectionOpenAck",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        #[doc = " ConnectionOpenConfirm defines a rpc handler method for MsgConnectionOpenConfirm."]
+        pub async fn connection_open_confirm(
+            &mut self,
+            request: impl tonic::IntoRequest<super::MsgConnectionOpenConfirm>,
+        ) -> Result<tonic::Response<super::MsgConnectionOpenConfirmResponse>, tonic::Status>
+        {
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/ibc.core.connection.v1.Msg/ConnectionOpenConfirm",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+    }
+}
 /// QueryConnectionRequest is the request type for the Query/Connection RPC
 /// method
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -245,6 +479,7 @@ pub mod query_client {
     #![allow(unused_variables, dead_code, missing_docs)]
     use tonic::codegen::*;
     #[doc = " Query provides defines the gRPC querier service"]
+    #[derive(Debug, Clone)]
     pub struct QueryClient<T> {
         inner: tonic::client::Grpc<T>,
     }
@@ -262,17 +497,43 @@ pub mod query_client {
     impl<T> QueryClient<T>
     where
         T: tonic::client::GrpcService<tonic::body::BoxBody>,
-        T::ResponseBody: Body + HttpBody + Send + 'static,
+        T::ResponseBody: Body + Send + Sync + 'static,
         T::Error: Into<StdError>,
-        <T::ResponseBody as HttpBody>::Error: Into<StdError> + Send,
+        <T::ResponseBody as Body>::Error: Into<StdError> + Send,
     {
         pub fn new(inner: T) -> Self {
             let inner = tonic::client::Grpc::new(inner);
             Self { inner }
         }
-        pub fn with_interceptor(inner: T, interceptor: impl Into<tonic::Interceptor>) -> Self {
-            let inner = tonic::client::Grpc::with_interceptor(inner, interceptor);
-            Self { inner }
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> QueryClient<InterceptedService<T, F>>
+        where
+            F: FnMut(tonic::Request<()>) -> Result<tonic::Request<()>, tonic::Status>,
+            T: Service<
+                http::Request<tonic::body::BoxBody>,
+                Response = http::Response<
+                    <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
+                >,
+            >,
+            <T as Service<http::Request<tonic::body::BoxBody>>>::Error:
+                Into<StdError> + Send + Sync,
+        {
+            QueryClient::new(InterceptedService::new(inner, interceptor))
+        }
+        #[doc = r" Compress requests with `gzip`."]
+        #[doc = r""]
+        #[doc = r" This requires the server to support it otherwise it might respond with an"]
+        #[doc = r" error."]
+        pub fn send_gzip(mut self) -> Self {
+            self.inner = self.inner.send_gzip();
+            self
+        }
+        #[doc = r" Enable decompressing responses with `gzip`."]
+        pub fn accept_gzip(mut self) -> Self {
+            self.inner = self.inner.accept_gzip();
+            self
         }
         #[doc = " Connection queries an IBC connection end."]
         pub async fn connection(
@@ -361,240 +622,6 @@ pub mod query_client {
                 "/ibc.core.connection.v1.Query/ConnectionConsensusState",
             );
             self.inner.unary(request.into_request(), path, codec).await
-        }
-    }
-    impl<T: Clone> Clone for QueryClient<T> {
-        fn clone(&self) -> Self {
-            Self {
-                inner: self.inner.clone(),
-            }
-        }
-    }
-    impl<T> std::fmt::Debug for QueryClient<T> {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "QueryClient {{ ... }}")
-        }
-    }
-}
-/// MsgConnectionOpenInit defines the msg sent by an account on Chain A to
-/// initialize a connection with Chain B.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenInit {
-    #[prost(string, tag = "1")]
-    pub client_id: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "2")]
-    pub counterparty: ::core::option::Option<Counterparty>,
-    #[prost(message, optional, tag = "3")]
-    pub version: ::core::option::Option<Version>,
-    #[prost(uint64, tag = "4")]
-    pub delay_period: u64,
-    #[prost(string, tag = "5")]
-    pub signer: ::prost::alloc::string::String,
-}
-/// MsgConnectionOpenInitResponse defines the Msg/ConnectionOpenInit response type.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenInitResponse {}
-/// MsgConnectionOpenTry defines a msg sent by a Relayer to try to open a
-/// connection on Chain B.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenTry {
-    #[prost(string, tag = "1")]
-    pub client_id: ::prost::alloc::string::String,
-    /// in the case of crossing hello's, when both chains call OpenInit, we need the connection identifier
-    /// of the previous connection in state INIT
-    #[prost(string, tag = "2")]
-    pub previous_connection_id: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "3")]
-    pub client_state: ::core::option::Option<::prost_types::Any>,
-    #[prost(message, optional, tag = "4")]
-    pub counterparty: ::core::option::Option<Counterparty>,
-    #[prost(uint64, tag = "5")]
-    pub delay_period: u64,
-    #[prost(message, repeated, tag = "6")]
-    pub counterparty_versions: ::prost::alloc::vec::Vec<Version>,
-    #[prost(message, optional, tag = "7")]
-    pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
-    /// proof of the initialization the connection on Chain A: `UNITIALIZED ->
-    /// INIT`
-    #[prost(bytes = "vec", tag = "8")]
-    pub proof_init: ::prost::alloc::vec::Vec<u8>,
-    /// proof of client state included in message
-    #[prost(bytes = "vec", tag = "9")]
-    pub proof_client: ::prost::alloc::vec::Vec<u8>,
-    /// proof of client consensus state
-    #[prost(bytes = "vec", tag = "10")]
-    pub proof_consensus: ::prost::alloc::vec::Vec<u8>,
-    #[prost(message, optional, tag = "11")]
-    pub consensus_height: ::core::option::Option<super::super::client::v1::Height>,
-    #[prost(string, tag = "12")]
-    pub signer: ::prost::alloc::string::String,
-}
-/// MsgConnectionOpenTryResponse defines the Msg/ConnectionOpenTry response type.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenTryResponse {}
-/// MsgConnectionOpenAck defines a msg sent by a Relayer to Chain A to
-/// acknowledge the change of connection state to TRYOPEN on Chain B.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenAck {
-    #[prost(string, tag = "1")]
-    pub connection_id: ::prost::alloc::string::String,
-    #[prost(string, tag = "2")]
-    pub counterparty_connection_id: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "3")]
-    pub version: ::core::option::Option<Version>,
-    #[prost(message, optional, tag = "4")]
-    pub client_state: ::core::option::Option<::prost_types::Any>,
-    #[prost(message, optional, tag = "5")]
-    pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
-    /// proof of the initialization the connection on Chain B: `UNITIALIZED ->
-    /// TRYOPEN`
-    #[prost(bytes = "vec", tag = "6")]
-    pub proof_try: ::prost::alloc::vec::Vec<u8>,
-    /// proof of client state included in message
-    #[prost(bytes = "vec", tag = "7")]
-    pub proof_client: ::prost::alloc::vec::Vec<u8>,
-    /// proof of client consensus state
-    #[prost(bytes = "vec", tag = "8")]
-    pub proof_consensus: ::prost::alloc::vec::Vec<u8>,
-    #[prost(message, optional, tag = "9")]
-    pub consensus_height: ::core::option::Option<super::super::client::v1::Height>,
-    #[prost(string, tag = "10")]
-    pub signer: ::prost::alloc::string::String,
-}
-/// MsgConnectionOpenAckResponse defines the Msg/ConnectionOpenAck response type.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenAckResponse {}
-/// MsgConnectionOpenConfirm defines a msg sent by a Relayer to Chain B to
-/// acknowledge the change of connection state to OPEN on Chain A.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenConfirm {
-    #[prost(string, tag = "1")]
-    pub connection_id: ::prost::alloc::string::String,
-    /// proof for the change of the connection state on Chain A: `INIT -> OPEN`
-    #[prost(bytes = "vec", tag = "2")]
-    pub proof_ack: ::prost::alloc::vec::Vec<u8>,
-    #[prost(message, optional, tag = "3")]
-    pub proof_height: ::core::option::Option<super::super::client::v1::Height>,
-    #[prost(string, tag = "4")]
-    pub signer: ::prost::alloc::string::String,
-}
-/// MsgConnectionOpenConfirmResponse defines the Msg/ConnectionOpenConfirm response type.
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct MsgConnectionOpenConfirmResponse {}
-#[doc = r" Generated client implementations."]
-pub mod msg_client {
-    #![allow(unused_variables, dead_code, missing_docs)]
-    use tonic::codegen::*;
-    #[doc = " Msg defines the ibc/connection Msg service."]
-    pub struct MsgClient<T> {
-        inner: tonic::client::Grpc<T>,
-    }
-    impl MsgClient<tonic::transport::Channel> {
-        #[doc = r" Attempt to create a new client by connecting to a given endpoint."]
-        pub async fn connect<D>(dst: D) -> Result<Self, tonic::transport::Error>
-        where
-            D: std::convert::TryInto<tonic::transport::Endpoint>,
-            D::Error: Into<StdError>,
-        {
-            let conn = tonic::transport::Endpoint::new(dst)?.connect().await?;
-            Ok(Self::new(conn))
-        }
-    }
-    impl<T> MsgClient<T>
-    where
-        T: tonic::client::GrpcService<tonic::body::BoxBody>,
-        T::ResponseBody: Body + HttpBody + Send + 'static,
-        T::Error: Into<StdError>,
-        <T::ResponseBody as HttpBody>::Error: Into<StdError> + Send,
-    {
-        pub fn new(inner: T) -> Self {
-            let inner = tonic::client::Grpc::new(inner);
-            Self { inner }
-        }
-        pub fn with_interceptor(inner: T, interceptor: impl Into<tonic::Interceptor>) -> Self {
-            let inner = tonic::client::Grpc::with_interceptor(inner, interceptor);
-            Self { inner }
-        }
-        #[doc = " ConnectionOpenInit defines a rpc handler method for MsgConnectionOpenInit."]
-        pub async fn connection_open_init(
-            &mut self,
-            request: impl tonic::IntoRequest<super::MsgConnectionOpenInit>,
-        ) -> Result<tonic::Response<super::MsgConnectionOpenInitResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/ibc.core.connection.v1.Msg/ConnectionOpenInit",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " ConnectionOpenTry defines a rpc handler method for MsgConnectionOpenTry."]
-        pub async fn connection_open_try(
-            &mut self,
-            request: impl tonic::IntoRequest<super::MsgConnectionOpenTry>,
-        ) -> Result<tonic::Response<super::MsgConnectionOpenTryResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/ibc.core.connection.v1.Msg/ConnectionOpenTry",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " ConnectionOpenAck defines a rpc handler method for MsgConnectionOpenAck."]
-        pub async fn connection_open_ack(
-            &mut self,
-            request: impl tonic::IntoRequest<super::MsgConnectionOpenAck>,
-        ) -> Result<tonic::Response<super::MsgConnectionOpenAckResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/ibc.core.connection.v1.Msg/ConnectionOpenAck",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-        #[doc = " ConnectionOpenConfirm defines a rpc handler method for MsgConnectionOpenConfirm."]
-        pub async fn connection_open_confirm(
-            &mut self,
-            request: impl tonic::IntoRequest<super::MsgConnectionOpenConfirm>,
-        ) -> Result<tonic::Response<super::MsgConnectionOpenConfirmResponse>, tonic::Status>
-        {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
-            let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/ibc.core.connection.v1.Msg/ConnectionOpenConfirm",
-            );
-            self.inner.unary(request.into_request(), path, codec).await
-        }
-    }
-    impl<T: Clone> Clone for MsgClient<T> {
-        fn clone(&self) -> Self {
-            Self {
-                inner: self.inner.clone(),
-            }
-        }
-    }
-    impl<T> std::fmt::Debug for MsgClient<T> {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            write!(f, "MsgClient {{ ... }}")
         }
     }
 }

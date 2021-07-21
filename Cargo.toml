@@ -12,9 +12,15 @@ exclude = [
     "proto-compiler"
 ]
 
-# [patch.crates-io]
-# tendermint              = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
-# tendermint-rpc          = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
-# tendermint-proto        = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
-# tendermint-light-client = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
-# tendermint-testgen      = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
+[patch.crates-io]
+tendermint              = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
+tendermint-rpc          = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
+tendermint-proto        = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
+tendermint-light-client = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
+tendermint-testgen      = { git = "https://github.com/informalsystems/tendermint-rs", branch = "master" }
+
+# tendermint              = { path = "../tendermint-rs/tendermint" }
+# tendermint-rpc          = { path = "../tendermint-rs/rpc" }
+# tendermint-proto        = { path = "../tendermint-rs/proto" }
+# tendermint-light-client = { path = "../tendermint-rs/light-client" }
+# tendermint-testgen      = { path = "../tendermint-rs/testgen" }

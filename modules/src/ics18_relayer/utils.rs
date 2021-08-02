@@ -50,7 +50,7 @@ where
 #[cfg(test)]
 mod tests {
     use crate::ics02_client::client_type::ClientType;
-    use crate::ics02_client::header::Header;
+    use crate::ics02_client::header::{AnyHeader, Header};
     use crate::ics18_relayer::context::Ics18Context;
     use crate::ics18_relayer::utils::build_client_update_datagram;
     use crate::ics24_host::identifier::{ChainId, ClientId};
@@ -59,6 +59,7 @@ mod tests {
     use crate::mock::host::HostType;
     use crate::Height;
     use test_env_log::test;
+    use tracing::debug;
 
     #[test]
     /// Serves to test both ICS 26 `dispatch` & `build_client_update_datagram` functions.
@@ -149,7 +150,19 @@ mod tests {
 
             // Update client on chain B to latest height of B.
             // - create the client update message with the latest header from B
-            let b_latest_header = ctx_b.query_latest_header().unwrap();
+            let mut b_latest_header = ctx_b.query_latest_header().unwrap();
+            // The test uses LightClientBlock that does not store the trusted height
+
+            b_latest_header = match b_latest_header {
+                AnyHeader::Tendermint(header) => {
+                    let th = header.height();
+                    let mut hheader = header.clone();
+                    hheader.trusted_height = th.decrement().unwrap();
+                    hheader.wrap_any()
+                }
+                AnyHeader::Mock(header) => header.wrap_any(),
+            };
+
             assert_eq!(
                 b_latest_header.client_type(),
                 ClientType::Tendermint,
@@ -169,6 +182,8 @@ mod tests {
             );
 
             let client_msg_a = client_msg_a_res.unwrap();
+
+            debug!("client_msg_a = {:?}", client_msg_a);
 
             // - send the message to A
             let dispatch_res_a = ctx_a.deliver(Ics26Envelope::Ics2Msg(client_msg_a));

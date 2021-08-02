@@ -111,6 +111,13 @@ impl ClientState {
         }
     }
 
+    pub fn with_set_frozen(self, h: Height) -> Self {
+        ClientState {
+            frozen_height: h,
+            ..self
+        }
+    }
+
     /// Helper function to verify the upgrade client procedure.
     /// Resets all fields except the blockchain-specific ones.
     pub fn zero_custom_fields(mut client_state: Self) -> Self {

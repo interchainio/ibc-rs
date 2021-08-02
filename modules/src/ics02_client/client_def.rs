@@ -4,6 +4,7 @@ use crate::downcast;
 use crate::ics02_client::client_consensus::{AnyConsensusState, ConsensusState};
 use crate::ics02_client::client_state::{AnyClientState, ClientState};
 use crate::ics02_client::client_type::ClientType;
+use crate::ics02_client::context::ClientReader;
 use crate::ics02_client::error::Error;
 use crate::ics02_client::header::{AnyHeader, Header};
 use crate::ics03_connection::connection::ConnectionEnd;
@@ -22,13 +23,15 @@ pub trait ClientDef: Clone {
     type ClientState: ClientState;
     type ConsensusState: ConsensusState;
 
-    /// TODO
     fn check_header_and_update_state(
         &self,
+        ctx: &dyn ClientReader,
+        client_id: ClientId,
         client_state: Self::ClientState,
         header: Self::Header,
     ) -> Result<(Self::ClientState, Self::ConsensusState), Error>;
 
+    /// TODO
     fn verify_upgrade_and_update_state(
         &self,
         client_state: &Self::ClientState,
@@ -172,6 +175,8 @@ impl ClientDef for AnyClient {
     /// Validates an incoming `header` against the latest consensus state of this client.
     fn check_header_and_update_state(
         &self,
+        ctx: &dyn ClientReader,
+        client_id: ClientId,
         client_state: AnyClientState,
         header: AnyHeader,
     ) -> Result<(AnyClientState, AnyConsensusState), Error> {
@@ -184,7 +189,7 @@ impl ClientDef for AnyClient {
                 .ok_or_else(|| Error::client_args_type_mismatch(ClientType::Tendermint))?;
 
                 let (new_state, new_consensus) =
-                    client.check_header_and_update_state(client_state, header)?;
+                    client.check_header_and_update_state(ctx, client_id, client_state, header)?;
 
                 Ok((
                     AnyClientState::Tendermint(new_state),
@@ -201,7 +206,7 @@ impl ClientDef for AnyClient {
                 .ok_or_else(|| Error::client_args_type_mismatch(ClientType::Mock))?;
 
                 let (new_state, new_consensus) =
-                    client.check_header_and_update_state(client_state, header)?;
+                    client.check_header_and_update_state(ctx, client_id, client_state, header)?;
 
                 Ok((
                     AnyClientState::Mock(new_state),

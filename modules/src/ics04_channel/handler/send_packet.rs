@@ -137,7 +137,10 @@ mod tests {
     use crate::ics04_channel::packet::Packet;
     use crate::ics24_host::identifier::{ChannelId, ClientId, ConnectionId, PortId};
     use crate::mock::context::MockContext;
+    use crate::timestamp::Timestamp;
     use crate::timestamp::ZERO_DURATION;
+    use std::ops::Add;
+    use std::time::Duration;
 
     #[test]
     fn send_packet_processing() {
@@ -150,7 +153,11 @@ mod tests {
 
         let context = MockContext::default();
 
-        let mut packet: Packet = get_dummy_raw_packet(1, 6).try_into().unwrap();
+        let timestamp = Timestamp::now().add(Duration::from_secs(10));
+        //CD:TODO remove unwrap
+        let mut packet: Packet = get_dummy_raw_packet(1, timestamp.unwrap().as_nanoseconds())
+            .try_into()
+            .unwrap();
         packet.sequence = 1.into();
         packet.data = vec![0];
 

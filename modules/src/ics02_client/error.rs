@@ -3,6 +3,7 @@ use crate::ics07_tendermint::error::Error as Ics07Error;
 use crate::ics23_commitment::error::Error as Ics23Error;
 use crate::ics24_host::error::ValidationError;
 use crate::ics24_host::identifier::ClientId;
+use crate::timestamp::Timestamp;
 use crate::Height;
 use std::num::TryFromIntError;
 use tendermint_proto::Error as TendermintError;
@@ -168,6 +169,12 @@ define_error! {
                     e.client_type)
             },
 
+        InsufficientVotingPower
+            { reason: String}
+            |e|{
+                format_args!("Insufficient overlap {}", e.reason )
+            },
+
         RawClientAndConsensusStateTypesMismatch
             {
                 state_type: ClientType,
@@ -194,8 +201,39 @@ define_error! {
                 client_height: Height,
             }
             | e | {
-                format_args!("upgraded client height {0} must be at greater than current client height {1}",
+                format_args!("upgraded client height {} must be at greater than current client height {}",
                     e.upgraded_height, e.client_height)
             },
+
+            InvalidConsensusStateTimestamp
+            {
+                time1: Timestamp,
+                time2: Timestamp,
+            }
+            | e |{
+                format_args!("Timestamp none or {} and now {}", e.time1, e.time2)
+            },
+
+
+
+            HeaderNotWithinTrustPeriod
+            {
+                latest_time:Timestamp,
+                update_time: Timestamp,
+            }
+            | e | {
+                format_args!("Header not withing trusting period: expires_at={0} now={1}",e.latest_time, e.update_time)
+            },
+
+            TendermintHandlerError
+            { err: Ics07Error }
+            | e | { format_args!("Tendermint-specific handler error: {}",e.err) },
+
+    }
+}
+
+impl From<Ics07Error> for Error {
+    fn from(e: Ics07Error) -> Error {
+        Error::tendermint_handler_error(e)
     }
 }

@@ -4,6 +4,7 @@ use std::num::{ParseIntError, TryFromIntError};
 use std::ops::{Add, Sub};
 use std::str::FromStr;
 use std::time::Duration;
+use tendermint::Time;
 
 use chrono::{offset::Utc, DateTime, TimeZone};
 use flex_error::{define_error, TraceError};
@@ -58,6 +59,12 @@ impl Timestamp {
         }
     }
 
+    // pub fn from_time(tendermint_time: Time) -> Timestamp {
+    //     Timestamp{
+    //         time: Some(tendermint_time.into())
+    //     }
+    // }
+
     /// Returns a `Timestamp` representation of the current time.
     pub fn now() -> Timestamp {
         Timestamp {
@@ -97,6 +104,11 @@ impl Timestamp {
     pub fn as_datetime(&self) -> Option<DateTime<Utc>> {
         self.time
     }
+
+    // /// Convert a `Timestamp` to an optional [`chrono::DateTime<Utc>`]
+    // pub fn as_time(&self) -> Option<Time> {
+    //     self.time.into()
+    // }
 
     /// Checks whether the timestamp has expired when compared to the
     /// `other` timestamp. Returns an [`Expiry`] result.
@@ -181,6 +193,14 @@ impl FromStr for Timestamp {
         let seconds = u64::from_str(s).map_err(ParseTimestampError::parse_int)?;
 
         Timestamp::from_nanoseconds(seconds).map_err(ParseTimestampError::try_from_int)
+    }
+}
+
+impl From<Time> for Timestamp {
+    fn from(tendermint_time: Time) -> Timestamp {
+        Timestamp {
+            time: Some(tendermint_time.into()),
+        }
     }
 }
 

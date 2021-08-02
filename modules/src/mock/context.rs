@@ -1,5 +1,7 @@
 //! Implementation of a global context mock. Used in testing handlers of all IBC modules.
 
+use ::tracing::info;
+
 use std::cmp::min;
 use std::collections::HashMap;
 
@@ -216,6 +218,7 @@ impl MockContext {
                     self.host_chain_id.clone(),
                     cs_height.revision_height,
                 );
+
                 let consensus_state = AnyConsensusState::from(light_block.clone());
                 let client_state =
                     get_dummy_tendermint_client_state(light_block.signed_header.header);
@@ -226,11 +229,79 @@ impl MockContext {
         };
         let consensus_states = vec![(cs_height, consensus_state)].into_iter().collect();
 
+        info!("Consensus state {:?}", consensus_states);
+
         let client_record = MockClientRecord {
             client_type,
             client_state,
             consensus_states,
         };
+        self.clients.insert(client_id.clone(), client_record);
+        self
+    }
+
+    pub fn with_client_parametrized_history(
+        mut self,
+        client_id: &ClientId,
+        client_state_height: Height,
+        client_type: Option<ClientType>,
+        consensus_state_height: Option<Height>,
+    ) -> Self {
+        let cs_height = consensus_state_height.unwrap_or(client_state_height);
+        let prev_cs_height = cs_height.clone().sub(1).unwrap_or(client_state_height);
+
+        let client_type = client_type.unwrap_or(ClientType::Mock);
+
+        let (client_state, consensus_state) = match client_type {
+            // If it's a mock client, create the corresponding mock states.
+            ClientType::Mock => (
+                Some(MockClientState(MockHeader::new(client_state_height)).into()),
+                MockConsensusState::new(MockHeader::new(cs_height)).into(),
+            ),
+            // If it's a Tendermint client, we need TM states.
+            ClientType::Tendermint => {
+                let light_block = HostBlock::generate_tm_block(
+                    self.host_chain_id.clone(),
+                    cs_height.revision_height,
+                );
+
+                let consensus_state = AnyConsensusState::from(light_block.clone());
+                let client_state =
+                    get_dummy_tendermint_client_state(light_block.signed_header.header);
+
+                // Return the tuple.
+                (Some(client_state), consensus_state)
+            }
+        };
+
+        let prev_consensus_state = match client_type {
+            // If it's a mock client, create the corresponding mock states.
+            ClientType::Mock => MockConsensusState::new(MockHeader::new(prev_cs_height)).into(),
+            // If it's a Tendermint client, we need TM states.
+            ClientType::Tendermint => {
+                let light_block = HostBlock::generate_tm_block(
+                    self.host_chain_id.clone(),
+                    prev_cs_height.revision_height,
+                );
+                AnyConsensusState::from(light_block)
+            }
+        };
+
+        let consensus_states = vec![
+            (prev_cs_height, prev_consensus_state),
+            (cs_height, consensus_state),
+        ]
+        .into_iter()
+        .collect();
+
+        info!("Consensus state {:?}", consensus_states);
+
+        let client_record = MockClientRecord {
+            client_type,
+            client_state,
+            consensus_states,
+        };
+
         self.clients.insert(client_id.clone(), client_record);
         self
     }
@@ -345,7 +416,7 @@ impl MockContext {
 
     /// Accessor for a block of the local (host) chain from this context.
     /// Returns `None` if the block at the requested height does not exist.
-    fn host_block(&self, target_height: Height) -> Option<&HostBlock> {
+    pub fn host_block(&self, target_height: Height) -> Option<&HostBlock> {
         let target = target_height.revision_height as usize;
         let latest = self.latest_height.revision_height as usize;
 
@@ -428,6 +499,21 @@ impl MockContext {
                 consensus_state: v.clone(),
             })
             .collect()
+    }
+
+    pub fn latest_client_states(&self, client_id: &ClientId) -> &AnyClientState {
+        self.clients[client_id].client_state.as_ref().unwrap()
+    }
+
+    pub fn latest_consensus_states(
+        &self,
+        client_id: &ClientId,
+        height: &Height,
+    ) -> &AnyConsensusState {
+        self.clients[client_id]
+            .consensus_states
+            .get(height)
+            .unwrap()
     }
 }
 

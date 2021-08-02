@@ -8,14 +8,25 @@ use tendermint::validator::Set as ValidatorSet;
 use tendermint::Time;
 use tendermint_proto::Protobuf;
 
+use crate::ics07_tendermint::error::VerificationError;
+use crate::timestamp::Timestamp;
+use tendermint::block::{Commit, CommitSig};
+use tendermint::trust_threshold::TrustThreshold;
+use tendermint::trust_threshold::TrustThresholdFraction;
+use tendermint::vote::{SignedVote, ValidatorIndex, Vote};
+
 use ibc_proto::ibc::lightclients::tendermint::v1::Header as RawHeader;
 
 use crate::ics02_client::client_type::ClientType;
 use crate::ics02_client::header::AnyHeader;
+use crate::ics07_tendermint::client_state::ClientState;
+use crate::ics07_tendermint::consensus_state::ConsensusState;
 use crate::ics07_tendermint::error::Error;
 use crate::ics24_host::identifier::ChainId;
 use crate::Height;
 use std::cmp::Ordering;
+use std::collections::HashSet;
+use std::ops::Sub;
 
 /// Tendermint consensus header
 #[derive(Clone, PartialEq, Deserialize, Serialize)] // TODO: Add Eq bound once present in tendermint-rs
@@ -69,6 +80,171 @@ pub fn headers_compatible(header: &SignedHeader, other: &SignedHeader) -> bool {
     }
 }
 
+pub fn monotonicity_checks(
+    latest_consensus_state: ConsensusState,
+    header: Header,
+    client_state: ClientState,
+) -> Result<(), Error> {
+    if client_state.latest_height() >= header.height() {
+        return Err(Error::low_update_height(
+            header.height(),
+            client_state.latest_height,
+        ));
+    }
+
+    if header.height().is_zero() {
+        return Err(Error::invalid_header_height(header.height()));
+    }
+
+    //check header timestamp is increasing
+    if latest_consensus_state.timestamp >= header.signed_header.header().time {
+        return Err(Error::header_timestamp_outside_trusting_time(
+            header.signed_header.header().time.as_rfc3339(),
+            latest_consensus_state.timestamp.as_rfc3339(),
+        ));
+    };
+
+    // check that the header is not outside the trusting period
+    if header
+        .signed_header
+        .header()
+        .time
+        .sub(client_state.trusting_period)
+        >= latest_consensus_state.timestamp
+    {
+        return Err(Error::low_update_timestamp(
+            header.signed_header.header().time.as_rfc3339(),
+            latest_consensus_state.timestamp.as_rfc3339(),
+        ));
+    };
+
+    // check monotonicity of header height vs trusted height.
+    // unclear needed
+    if header.trusted_height >= header.height() {
+        return Err(Error::invalid_trusted_header_height(
+            header.trusted_height,
+            header.height(),
+        ));
+    };
+
+    Ok(())
+}
+
+/// Compute the voting power in a header and its commit against a validator set.
+///
+/// The `trust_threshold` is currently not used, but might be in the future
+/// for optimization purposes.
+pub fn voting_power_in(
+    signed_header: &SignedHeader,
+    validator_set: &ValidatorSet,
+    trust_threshold: TrustThresholdFraction,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let signatures = &signed_header.commit.signatures;
+
+    let mut tallied_voting_power = 0_u64;
+    let mut seen_validators = HashSet::new();
+
+    // Get non-absent votes from the signatures
+    let non_absent_votes = signatures.iter().enumerate().flat_map(|(idx, signature)| {
+        non_absent_vote(
+            signature,
+            ValidatorIndex::try_from(idx).unwrap(),
+            &signed_header.commit,
+        )
+        .map(|vote| (signature, vote))
+    });
+
+    let total_voting_power = total_power_of(validator_set);
+
+    for (signature, vote) in non_absent_votes {
+        // Ensure we only count a validator's power once
+        if seen_validators.contains(&vote.validator_address) {
+            return Err(VerificationError::duplicate_validator(vote.validator_address).into());
+        } else {
+            seen_validators.insert(vote.validator_address);
+        }
+
+        let validator = match validator_set.validator(vote.validator_address) {
+            Some(validator) => validator,
+            None => continue, // Cannot find matching validator, so we skip the vote
+        };
+
+        let signed_vote = SignedVote::new(
+            vote.clone(),
+            signed_header.header.chain_id.clone(),
+            vote.validator_address,
+            vote.signature,
+        );
+
+        let sign_bytes = signed_vote.sign_bytes();
+        //     Check vote is valid
+        if validator
+            .verify_signature(&sign_bytes, signed_vote.signature())
+            .is_err()
+        {
+            //continue;
+            return Err(VerificationError::invalid_signature().into());
+        }
+
+        // If the vote is neither absent nor nil, tally its power
+        if signature.is_commit() {
+            tallied_voting_power += validator.power();
+            if trust_threshold.is_enough_power(tallied_voting_power, total_voting_power) {
+                return Ok(());
+            }
+        } else {
+            // It's OK. We include stray signatures (~votes for nil)
+            // to measure validator availability.
+        }
+    }
+
+    Err(VerificationError::insufficient_overlap(tallied_voting_power, total_voting_power).into())
+}
+
+/// Compute the total voting power in a validator set
+fn total_power_of(validator_set: &ValidatorSet) -> u64 {
+    validator_set
+        .validators()
+        .iter()
+        .fold(0u64, |total, val_info| total + val_info.power.value())
+}
+
+fn non_absent_vote(
+    commit_sig: &CommitSig,
+    validator_index: ValidatorIndex,
+    commit: &Commit,
+) -> Option<Vote> {
+    let (validator_address, timestamp, signature, block_id) = match commit_sig {
+        CommitSig::BlockIdFlagAbsent { .. } => return None,
+        CommitSig::BlockIdFlagCommit {
+            validator_address,
+            timestamp,
+            signature,
+        } => (
+            *validator_address,
+            *timestamp,
+            signature,
+            Some(commit.block_id),
+        ),
+        CommitSig::BlockIdFlagNil {
+            validator_address,
+            timestamp,
+            signature,
+        } => (*validator_address, *timestamp, signature, None),
+    };
+
+    Some(Vote {
+        vote_type: tendermint::vote::Type::Precommit,
+        height: commit.height,
+        round: commit.round,
+        block_id,
+        timestamp: Some(timestamp),
+        validator_address,
+        validator_index,
+        signature: *signature,
+    })
+}
+
 impl crate::ics02_client::header::Header for Header {
     fn client_type(&self) -> ClientType {
         ClientType::Tendermint
@@ -76,6 +252,10 @@ impl crate::ics02_client::header::Header for Header {
 
     fn height(&self) -> Height {
         self.height()
+    }
+
+    fn timestamp(&self) -> Timestamp {
+        self.time().into()
     }
 
     fn wrap_any(self) -> AnyHeader {

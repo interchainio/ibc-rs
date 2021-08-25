@@ -1,4 +1,4 @@
-use std::fmt;
+use core::fmt;
 
 use abscissa_core::{config, Command, Options, Runnable};
 

@@ -1,5 +1,6 @@
-use std::convert::TryFrom;
-use std::str::FromStr;
+use crate::prelude::*;
+use core::convert::TryFrom;
+use core::str::FromStr;
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -39,8 +40,8 @@ pub enum Receipt {
     Ok,
 }
 
-impl std::fmt::Display for PacketMsgType {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for PacketMsgType {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match self {
             PacketMsgType::Recv => write!(f, "(PacketMsgType::Recv)"),
             PacketMsgType::Ack => write!(f, "(PacketMsgType::Ack)"),
@@ -93,8 +94,8 @@ impl From<Sequence> for u64 {
     }
 }
 
-impl std::fmt::Display for Sequence {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for Sequence {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "{}", self.0)
     }
 }
@@ -120,8 +121,8 @@ impl Packet {
     }
 }
 
-impl std::fmt::Debug for Packet {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Debug for Packet {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "{:?} {:?} {:?}",
@@ -131,8 +132,8 @@ impl std::fmt::Debug for Packet {
 }
 
 /// Custom debug output to omit the packet data
-impl std::fmt::Display for Packet {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for Packet {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "seq:{}, path:{}/{}->{}/{}, toh:{}, tos:{})",
@@ -155,7 +156,7 @@ impl Default for Packet {
             source_channel: Default::default(),
             destination_port: Default::default(),
             destination_channel: Default::default(),
-            data: vec![],
+            data: Vec::new(),
             timeout_height: Default::default(),
             timeout_timestamp: Default::default(),
         }
@@ -220,6 +221,7 @@ impl From<Packet> for RawPacket {
 
 #[cfg(test)]
 pub mod test_utils {
+    use crate::prelude::*;
     use ibc_proto::ibc::core::channel::v1::Packet as RawPacket;
     use ibc_proto::ibc::core::client::v1::Height as RawHeight;
 
@@ -245,7 +247,8 @@ pub mod test_utils {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     use ibc_proto::ibc::core::channel::v1::Packet as RawPacket;

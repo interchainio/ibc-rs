@@ -3,9 +3,11 @@ use crate::ics02_client::error as client_error;
 use crate::ics04_channel::channel::State;
 use crate::ics24_host::error::ValidationError;
 use crate::ics24_host::identifier::{ChannelId, ClientId, ConnectionId, PortId};
+use crate::prelude::*;
 use crate::proofs::ProofError;
 use crate::timestamp::Timestamp;
 use crate::Height;
+
 use flex_error::{define_error, TraceError};
 use tendermint_proto::Error as TendermintError;
 
@@ -191,7 +193,7 @@ define_error! {
 
         InvalidStringAsSequence
             { value: String }
-            [ TraceError<std::num::ParseIntError> ]
+            [ TraceError<core::num::ParseIntError> ]
             | e | {
                 format_args!(
                     "String {0} cannot be converted to packet sequence",
@@ -246,7 +248,7 @@ define_error! {
             | _ | { "Receiving chain block timestamp >= packet timeout timestamp" },
 
         InvalidPacketTimestamp
-            [ TraceError<std::num::TryFromIntError> ]
+            [ TraceError<core::num::TryFromIntError> ]
             | _ | { "Invalid packet timeout timestamp value" },
 
         ErrorInvalidConsensusState

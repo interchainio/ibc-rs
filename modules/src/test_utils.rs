@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use crate::prelude::*;
 use tendermint::{block, consensus, evidence, public_key::Algorithm};
 
 use crate::signer::Signer;
@@ -14,7 +15,7 @@ pub fn default_consensus_params() -> consensus::Params {
         },
         evidence: evidence::Params {
             max_age_num_blocks: 100000,
-            max_age_duration: evidence::Duration(std::time::Duration::new(48 * 3600, 0)),
+            max_age_duration: evidence::Duration(core::time::Duration::new(48 * 3600, 0)),
             max_bytes: 0,
         },
         validator: consensus::params::ValidatorParams {

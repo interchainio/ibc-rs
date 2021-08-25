@@ -1,9 +1,8 @@
-use std::{
-    collections::HashMap,
-    ops::Deref,
-    sync::{Arc, RwLock},
-    time::Duration,
-};
+use alloc::collections::btree_map::BTreeMap as HashMap;
+use alloc::sync::Arc;
+use core::ops::Deref;
+use core::time::Duration;
+use std::sync::RwLock;
 
 use crossbeam_channel::{Receiver, Sender};
 use itertools::Itertools;
@@ -625,9 +624,9 @@ impl<Chain: ChainHandle + 'static> Supervisor<Chain> {
         let height = batch.height;
         let chain_id = batch.chain_id.clone();
 
-        let mut collected = self.collect_events(&src_chain, batch);
+        let collected = self.collect_events(&src_chain, batch);
 
-        for (object, events) in collected.per_object.drain() {
+        for (object, events) in collected.per_object.into_iter() {
             if !self.relay_on_object(&src_chain.id(), &object) {
                 trace!(
                     "skipping events for '{}'. \

@@ -1,4 +1,4 @@
-use tendermint_rpc::event::{Event as RpcEvent, EventData as RpcEventData, EventData};
+use tendermint_rpc::event::{Event as RpcEvent, EventData as RpcEventData};
 
 use ibc::events::{from_tx_response_event, IbcEvent};
 use ibc::ics02_client::events::NewBlock;
@@ -20,7 +20,7 @@ pub fn get_all_events(
 
             vals.push((height, NewBlock::new(height).into()));
         }
-        EventData::Tx { tx_result } => {
+        RpcEventData::Tx { tx_result } => {
             let height = Height::new(
                 ChainId::chain_version(chain_id.to_string().as_str()),
                 tx_result.height as u64,

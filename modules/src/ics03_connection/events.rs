@@ -1,8 +1,10 @@
 //! Types for the IBC events emitted from Tendermint Websocket by the connection module.
+
+use serde_derive::{Deserialize, Serialize};
+
 use crate::events::IbcEvent;
 use crate::ics02_client::height::Height;
 use crate::ics24_host::identifier::{ClientId, ConnectionId};
-use serde_derive::{Deserialize, Serialize};
 
 /// The content of the `type` field for the event that a chain produces upon executing a connection handshake transaction.
 const INIT_EVENT_TYPE: &str = "connection_open_init";

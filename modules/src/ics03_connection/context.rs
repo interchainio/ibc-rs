@@ -10,6 +10,7 @@ use crate::ics03_connection::handler::{ConnectionIdState, ConnectionResult};
 use crate::ics03_connection::version::{get_compatible_versions, pick_version, Version};
 use crate::ics23_commitment::commitment::CommitmentPrefix;
 use crate::ics24_host::identifier::{ClientId, ConnectionId};
+use crate::prelude::*;
 use crate::Height;
 
 /// A context supplying all the necessary read-only dependencies for processing any `ConnectionMsg`.

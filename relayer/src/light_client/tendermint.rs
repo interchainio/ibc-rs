@@ -1,4 +1,4 @@
-use std::convert::{TryFrom, TryInto};
+use core::convert::{TryFrom, TryInto};
 
 use itertools::Itertools;
 
@@ -124,7 +124,7 @@ impl super::LightClient<CosmosSdkChain> for LightClient {
             ibc::Height::new(self.chain_id.version(), latest_chain_block.height().into());
 
         // set the target height to the minimum between the update height and latest chain height
-        let target_height = std::cmp::min(update.consensus_height(), latest_chain_height);
+        let target_height = core::cmp::min(update.consensus_height(), latest_chain_height);
         let trusted_height = update_header.trusted_height;
 
         // TODO - check that a consensus state at trusted_height still exists on-chain,

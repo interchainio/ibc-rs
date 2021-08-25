@@ -1,8 +1,10 @@
+use crate::prelude::*;
+
 /// Path-space as listed in ICS-024
 /// https://github.com/cosmos/ics/tree/master/spec/ics-024-host-requirements#path-space
 /// Some of these are implemented in other ICSs, but ICS-024 has a nice summary table.
 ///
-use std::fmt::{Display, Formatter, Result};
+use core::fmt::{Display, Formatter, Result};
 
 use crate::ics04_channel::packet::Sequence;
 use crate::ics24_host::identifier::{ChannelId, ClientId, ConnectionId, PortId};

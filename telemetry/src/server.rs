@@ -1,4 +1,5 @@
-use std::{error::Error, net::ToSocketAddrs, sync::Arc};
+use alloc::sync::Arc;
+use std::{error::Error, net::ToSocketAddrs};
 
 use prometheus::{Encoder, TextEncoder};
 use rouille::{Request, Response, Server};

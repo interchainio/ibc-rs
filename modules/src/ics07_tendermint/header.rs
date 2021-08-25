@@ -1,4 +1,5 @@
-use std::convert::{TryFrom, TryInto};
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
 
 use bytes::Buf;
 use prost::Message;
@@ -15,7 +16,7 @@ use crate::ics02_client::header::AnyHeader;
 use crate::ics07_tendermint::error::Error;
 use crate::ics24_host::identifier::ChainId;
 use crate::Height;
-use std::cmp::Ordering;
+use core::cmp::Ordering;
 
 /// Tendermint consensus header
 #[derive(Clone, PartialEq, Deserialize, Serialize)] // TODO: Add Eq bound once present in tendermint-rs
@@ -26,8 +27,8 @@ pub struct Header {
     pub trusted_validator_set: ValidatorSet, // the last trusted validator set at trusted height
 }
 
-impl std::fmt::Debug for Header {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Debug for Header {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, " Header {{...}}")
     }
 }
@@ -130,7 +131,8 @@ impl From<Header> for RawHeader {
 
 #[cfg(test)]
 pub mod test_util {
-    use std::convert::TryInto;
+    use crate::prelude::*;
+    use core::convert::TryInto;
 
     use subtle_encoding::hex;
     use tendermint::block::signed_header::SignedHeader;

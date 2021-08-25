@@ -116,7 +116,7 @@ impl TxIcs20MsgTransferCmd {
             denom,
             receiver: self.receiver.clone(),
             timeout_height_offset: self.timeout_height_offset,
-            timeout_seconds: std::time::Duration::from_secs(self.timeout_seconds),
+            timeout_seconds: core::time::Duration::from_secs(self.timeout_seconds),
             number_msgs,
         };
 

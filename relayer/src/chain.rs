@@ -1,5 +1,4 @@
-use std::sync::Arc;
-
+use alloc::sync::Arc;
 use prost_types::Any;
 use tendermint::block::Height;
 use tokio::runtime::Runtime as TokioRuntime;

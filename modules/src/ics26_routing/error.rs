@@ -1,8 +1,10 @@
+use crate::prelude::*;
+use flex_error::{define_error, TraceError};
+
 use crate::application::ics20_fungible_token_transfer;
 use crate::ics02_client;
 use crate::ics03_connection;
 use crate::ics04_channel;
-use flex_error::{define_error, TraceError};
 
 define_error! {
     #[derive(Debug, PartialEq, Eq)]

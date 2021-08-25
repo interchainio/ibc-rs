@@ -1,5 +1,5 @@
-use std::{convert::Infallible, fmt::Display, str::FromStr};
-
+use crate::prelude::*;
+use core::{convert::Infallible, fmt::Display, str::FromStr};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
@@ -16,7 +16,7 @@ impl Signer {
 }
 
 impl Display for Signer {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         write!(f, "{}", self.0)
     }
 }

@@ -7,6 +7,7 @@ use crate::ics04_channel::events::SendPacket;
 use crate::ics04_channel::packet::{PacketResult, Sequence};
 use crate::ics04_channel::{context::ChannelReader, error::Error, packet::Packet};
 use crate::ics24_host::identifier::{ChannelId, PortId};
+use crate::prelude::*;
 use crate::timestamp::{Expiry, Timestamp};
 use crate::Height;
 
@@ -122,7 +123,8 @@ pub fn send_packet(ctx: &dyn ChannelReader, packet: Packet) -> HandlerResult<Pac
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
+    use crate::prelude::*;
+    use core::convert::TryInto;
     use test_env_log::test;
 
     use crate::events::IbcEvent;

@@ -20,6 +20,8 @@
     unused_qualifications
 )]
 
+extern crate alloc;
+
 pub mod application;
 pub mod commands;
 pub mod config;

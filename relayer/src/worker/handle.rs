@@ -1,7 +1,5 @@
-use std::{
-    fmt,
-    thread::{self, JoinHandle},
-};
+use core::fmt;
+use std::thread::{self, JoinHandle};
 
 use crossbeam_channel::Sender;
 use tracing::trace;

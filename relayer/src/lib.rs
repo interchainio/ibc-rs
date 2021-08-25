@@ -16,6 +16,8 @@
 //!
 //! [Hermes]: https://docs.rs/ibc-relayer-cli/0.2.0/
 
+extern crate alloc;
+
 pub mod chain;
 pub mod channel;
 pub mod config;

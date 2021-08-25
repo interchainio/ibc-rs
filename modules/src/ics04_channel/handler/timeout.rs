@@ -10,6 +10,7 @@ use crate::ics04_channel::msgs::timeout::MsgTimeout;
 use crate::ics04_channel::packet::{PacketResult, Sequence};
 use crate::ics04_channel::{context::ChannelReader, error::Error};
 use crate::ics24_host::identifier::{ChannelId, PortId};
+use crate::prelude::*;
 use crate::timestamp::Expiry;
 
 #[derive(Clone, Debug)]
@@ -158,11 +159,12 @@ mod tests {
     use crate::ics04_channel::msgs::timeout::test_util::get_dummy_raw_msg_timeout;
     use crate::ics04_channel::msgs::timeout::MsgTimeout;
     use crate::ics24_host::identifier::{ChannelId, ClientId, ConnectionId, PortId};
+    use crate::prelude::*;
     use crate::timestamp::ZERO_DURATION;
 
     use crate::mock::context::MockContext;
 
-    use std::convert::TryFrom;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     #[test]

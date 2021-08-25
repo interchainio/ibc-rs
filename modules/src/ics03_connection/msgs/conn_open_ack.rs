@@ -1,8 +1,7 @@
-use std::convert::{TryFrom, TryInto};
-
-use tendermint_proto::Protobuf;
-
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
 use ibc_proto::ibc::core::connection::v1::MsgConnectionOpenAck as RawMsgConnectionOpenAck;
+use tendermint_proto::Protobuf;
 
 use crate::ics02_client::client_state::AnyClientState;
 use crate::ics03_connection::error::Error;
@@ -157,6 +156,7 @@ impl From<MsgConnectionOpenAck> for RawMsgConnectionOpenAck {
 
 #[cfg(test)]
 pub mod test_util {
+    use crate::prelude::*;
     use ibc_proto::ibc::core::client::v1::Height;
     use ibc_proto::ibc::core::connection::v1::MsgConnectionOpenAck as RawMsgConnectionOpenAck;
 
@@ -182,7 +182,7 @@ pub mod test_util {
                 revision_height: consensus_height,
             }),
             client_state: None,
-            proof_client: vec![],
+            proof_client: Vec::new(),
             version: Some(Version::default().into()),
             signer: get_dummy_bech32_account(),
         }
@@ -191,7 +191,8 @@ pub mod test_util {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     use ibc_proto::ibc::core::client::v1::Height;

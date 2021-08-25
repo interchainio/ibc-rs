@@ -1,3 +1,7 @@
+use crate::prelude::*;
+use core::fmt;
+use flex_error::{define_error, TraceError};
+use prost::alloc::fmt::Formatter;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::ics02_client::error as client_error;
@@ -12,9 +16,6 @@ use crate::ics04_channel::events::Attributes as ChannelAttributes;
 use crate::ics24_host::error::ValidationError;
 use crate::timestamp::ParseTimestampError;
 use crate::Height;
-use flex_error::{define_error, TraceError};
-use prost::alloc::fmt::Formatter;
-use std::fmt;
 
 define_error! {
     Error {

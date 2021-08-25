@@ -1,6 +1,7 @@
 //! Definition of domain type message `MsgCreateAnyClient`.
 
-use std::convert::TryFrom;
+use crate::prelude::*;
+use core::convert::TryFrom;
 
 use tendermint_proto::Protobuf;
 
@@ -97,7 +98,7 @@ impl From<MsgCreateAnyClient> for RawMsgCreateClient {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::{TryFrom, TryInto};
+    use core::convert::{TryFrom, TryInto};
     use test_env_log::test;
 
     use ibc_proto::ibc::core::client::v1::MsgCreateClient;

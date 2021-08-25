@@ -3,6 +3,8 @@ use crate::events::IbcEvent;
 use crate::ics02_client::height::Height;
 use crate::ics04_channel::packet::Packet;
 use crate::ics24_host::identifier::{ChannelId, ConnectionId, PortId};
+use crate::prelude::*;
+
 use serde_derive::{Deserialize, Serialize};
 
 /// Channel event types
@@ -122,7 +124,7 @@ fn extract_attributes_from_tx(event: &tendermint::abci::Event) -> Attributes {
 
 fn extract_packet_and_write_ack_from_tx(event: &tendermint::abci::Event) -> (Packet, Vec<u8>) {
     let mut packet = Packet::default();
-    let mut write_ack: Vec<u8> = vec![];
+    let mut write_ack: Vec<u8> = Vec::new();
     for tag in &event.attributes {
         let key = tag.key.as_ref();
         let value = tag.value.as_ref();
@@ -358,8 +360,8 @@ impl From<CloseInit> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for CloseInit {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for CloseInit {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "{} {} {:?}",
@@ -430,8 +432,8 @@ impl From<SendPacket> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for SendPacket {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for SendPacket {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "SendPacket - h:{}, {}", self.height, self.packet)
     }
 }
@@ -469,8 +471,8 @@ impl From<ReceivePacket> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for ReceivePacket {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for ReceivePacket {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "ReceivePacket - h:{}, {}", self.height, self.packet)
     }
 }
@@ -510,8 +512,8 @@ impl From<WriteAcknowledgement> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for WriteAcknowledgement {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for WriteAcknowledgement {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "WriteAcknowledgement - h:{}, {}",
@@ -547,8 +549,8 @@ impl From<AcknowledgePacket> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for AcknowledgePacket {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for AcknowledgePacket {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "h:{}, {}", self.height, self.packet)
     }
 }
@@ -586,8 +588,8 @@ impl From<TimeoutPacket> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for TimeoutPacket {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for TimeoutPacket {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "TimeoutPacket - h:{}, {}", self.height, self.packet)
     }
 }
@@ -625,8 +627,8 @@ impl From<TimeoutOnClosePacket> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for TimeoutOnClosePacket {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for TimeoutOnClosePacket {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "TimeoutOnClosePacket - h:{}, {}",

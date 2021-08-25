@@ -1,4 +1,4 @@
-use std::fmt;
+use core::fmt;
 
 use prost_types::Any;
 use tendermint_rpc::endpoint::broadcast::tx_sync;

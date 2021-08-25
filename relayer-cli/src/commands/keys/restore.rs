@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use core::str::FromStr;
 
 use abscissa_core::{Command, Options, Runnable};
 

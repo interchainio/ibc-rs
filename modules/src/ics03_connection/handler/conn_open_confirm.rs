@@ -9,6 +9,7 @@ use crate::ics03_connection::events::Attributes;
 use crate::ics03_connection::handler::verify::verify_proofs;
 use crate::ics03_connection::handler::{ConnectionIdState, ConnectionResult};
 use crate::ics03_connection::msgs::conn_open_confirm::MsgConnectionOpenConfirm;
+use crate::prelude::*;
 
 pub(crate) fn process(
     ctx: &dyn ConnectionReader,
@@ -72,8 +73,9 @@ pub(crate) fn process(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
-    use std::str::FromStr;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
+    use core::str::FromStr;
     use test_env_log::test;
 
     use crate::events::IbcEvent;
@@ -104,7 +106,7 @@ mod tests {
         let counterparty = Counterparty::new(
             client_id.clone(),
             Some(msg_confirm.connection_id().clone()),
-            CommitmentPrefix::from(vec![]),
+            CommitmentPrefix::from(Vec::new()),
         );
 
         let context = MockContext::default();

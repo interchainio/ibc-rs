@@ -1,6 +1,7 @@
 use core::fmt;
-use std::iter::Iterator;
-use std::time::{Duration, Instant};
+use core::iter::Iterator;
+use core::time::Duration;
+use std::time::Instant;
 
 use tracing::{debug, error, trace};
 

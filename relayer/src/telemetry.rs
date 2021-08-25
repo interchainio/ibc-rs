@@ -1,6 +1,6 @@
 // If the `telemetry` feature is enabled, re-export the `ibc-telemetry` state.
 #[cfg(feature = "telemetry")]
-pub type Telemetry = std::sync::Arc<ibc_telemetry::TelemetryState>;
+pub type Telemetry = alloc::sync::Arc<ibc_telemetry::TelemetryState>;
 
 // Otherwise, define and export a dummy type.
 #[cfg(not(feature = "telemetry"))]

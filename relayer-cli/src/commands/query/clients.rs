@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use alloc::sync::Arc;
 
 use abscissa_core::{Command, Options, Runnable};
 use serde::Serialize;

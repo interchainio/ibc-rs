@@ -1,10 +1,10 @@
-use std::convert::TryFrom;
-
+use crate::prelude::*;
+use core::convert::TryFrom;
+use core::str::FromStr;
 use ibc_proto::ibc::core::connection::v1::Version as RawVersion;
 use tendermint_proto::Protobuf;
 
 use crate::ics04_channel::error::Error;
-use std::str::FromStr;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Version {
@@ -52,8 +52,8 @@ impl FromStr for Version {
     }
 }
 
-impl std::fmt::Display for Version {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for Version {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "{}",
@@ -74,7 +74,7 @@ pub fn pick_version(
     supported_versions: Vec<String>,
     counterparty_versions: Vec<String>,
 ) -> Result<String, Error> {
-    let mut intersection: Vec<Version> = vec![];
+    let mut intersection: Vec<Version> = Vec::new();
     for s in supported_versions.iter() {
         let supported_version = Version::decode(s.as_bytes()).map_err(Error::invalid_version)?;
         for c in counterparty_versions.iter() {

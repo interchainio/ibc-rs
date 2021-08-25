@@ -1,4 +1,6 @@
-use std::{fmt, ops::Deref, str::FromStr, sync::Arc, thread};
+use alloc::sync::Arc;
+use core::{fmt, ops::Deref, str::FromStr};
+use std::thread;
 
 use abscissa_core::{application::fatal_error, Command, Options, Runnable};
 use itertools::Itertools;

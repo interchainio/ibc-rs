@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use alloc::collections::btree_map::BTreeMap as HashMap;
 use std::ffi::OsStr;
 use std::fs::{self, File};
 use std::path::{Path, PathBuf};

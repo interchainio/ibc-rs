@@ -1,6 +1,7 @@
+use alloc::sync::Arc;
 use std::error::Error;
 use std::io;
-use std::sync::{Arc, RwLock};
+use std::sync::RwLock;
 
 use abscissa_core::{Command, Options, Runnable};
 use crossbeam_channel::Sender;

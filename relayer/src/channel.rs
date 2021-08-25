@@ -1,8 +1,8 @@
 #![allow(clippy::borrowed_box)]
 
+use core::time::Duration;
 use prost_types::Any;
 use serde::Serialize;
-use std::time::Duration;
 use tracing::{debug, error, info, warn};
 
 use ibc::events::IbcEvent;
@@ -31,7 +31,7 @@ pub mod error;
 pub use error::ChannelError;
 
 mod retry_strategy {
-    use std::time::Duration;
+    use core::time::Duration;
 
     use retry::delay::Fibonacci;
 

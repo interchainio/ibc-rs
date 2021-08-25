@@ -1,7 +1,7 @@
 //! Chain upgrade plans for triggering IBC-breaking upgrades.
 #![allow(deprecated)] // TODO(hu55a1n1): remove this when we don't need legacy upgrade support
 
-use std::time::Duration;
+use core::time::Duration;
 
 use bytes::BufMut;
 use flex_error::define_error;

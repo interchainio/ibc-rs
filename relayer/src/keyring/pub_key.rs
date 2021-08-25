@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use core::str::FromStr;
 
 use serde::{Deserialize, Deserializer};
 use subtle_encoding::base64;

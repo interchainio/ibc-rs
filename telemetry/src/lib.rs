@@ -1,10 +1,12 @@
+extern crate alloc;
+
 pub mod server;
 pub mod state;
 
+use alloc::sync::Arc;
 use std::{
     error::Error,
     net::{SocketAddr, ToSocketAddrs},
-    sync::Arc,
     thread::JoinHandle,
 };
 

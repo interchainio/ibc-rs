@@ -2,7 +2,7 @@
 //! represented as a fraction with valid values in the
 //! range `[0, 1)`.
 
-use std::{convert::TryFrom, fmt};
+use core::{convert::TryFrom, fmt};
 
 use serde::{Deserialize, Serialize};
 use tendermint_proto::Protobuf;

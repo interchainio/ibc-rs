@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use alloc::collections::BTreeMap as HashMap;
 
 use flex_error::define_error;
 use tracing::{debug, trace};
@@ -31,7 +31,7 @@ impl Permission {
     }
 }
 
-#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 enum CacheKey {
     Client(ChainId, ClientId),
     Channel(ChainId, PortId, ChannelId),

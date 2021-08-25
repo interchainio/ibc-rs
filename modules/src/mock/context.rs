@@ -1,7 +1,8 @@
 //! Implementation of a global context mock. Used in testing handlers of all IBC modules.
 
-use std::cmp::min;
-use std::collections::HashMap;
+use crate::prelude::*;
+use alloc::collections::btree_map::BTreeMap as HashMap;
+use core::cmp::min;
 
 use prost_types::Any;
 use sha2::Digest;
@@ -649,7 +650,7 @@ impl ConnectionReader for MockContext {
     }
 
     fn commitment_prefix(&self) -> CommitmentPrefix {
-        CommitmentPrefix::from(vec![])
+        CommitmentPrefix::from(Vec::new())
     }
 
     fn client_consensus_state(
@@ -814,6 +815,7 @@ mod tests {
     use crate::ics24_host::identifier::ChainId;
     use crate::mock::context::MockContext;
     use crate::mock::host::HostType;
+    use crate::prelude::*;
     use crate::Height;
     use test_env_log::test;
 

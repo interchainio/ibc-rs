@@ -1,6 +1,7 @@
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
 use core::marker::{Send, Sync};
-use std::convert::{TryFrom, TryInto};
-use std::time::Duration;
+use core::time::Duration;
 
 use prost_types::Any;
 use serde::{Deserialize, Serialize};
@@ -21,7 +22,7 @@ use crate::Height;
 pub const TENDERMINT_CLIENT_STATE_TYPE_URL: &str = "/ibc.lightclients.tendermint.v1.ClientState";
 pub const MOCK_CLIENT_STATE_TYPE_URL: &str = "/ibc.mock.ClientState";
 
-pub trait ClientState: Clone + std::fmt::Debug + Send + Sync {
+pub trait ClientState: Clone + core::fmt::Debug + Send + Sync {
     /// Return the chain identifier which this client is serving (i.e., the client is verifying
     /// consensus states from this chain).
     fn chain_id(&self) -> ChainId;
@@ -216,7 +217,7 @@ impl From<IdentifiedAnyClientState> for IdentifiedClientState {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     use prost_types::Any;

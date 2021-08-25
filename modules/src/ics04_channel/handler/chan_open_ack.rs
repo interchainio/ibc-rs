@@ -9,6 +9,7 @@ use crate::ics04_channel::events::Attributes;
 use crate::ics04_channel::handler::verify::verify_channel_proofs;
 use crate::ics04_channel::handler::{ChannelIdState, ChannelResult};
 use crate::ics04_channel::msgs::chan_open_ack::MsgChannelOpenAck;
+use crate::prelude::*;
 
 pub(crate) fn process(
     ctx: &dyn ChannelReader,
@@ -106,8 +107,9 @@ pub(crate) fn process(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
-    use std::str::FromStr;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
+    use core::str::FromStr;
     use test_env_log::test;
 
     use crate::events::IbcEvent;

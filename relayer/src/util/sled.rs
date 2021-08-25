@@ -1,5 +1,5 @@
+use core::marker::PhantomData;
 use serde::{de::DeserializeOwned, Serialize};
-use std::marker::PhantomData;
 
 use crate::error::Error;
 

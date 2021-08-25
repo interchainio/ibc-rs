@@ -1,7 +1,7 @@
+use core::str::FromStr;
 use std::{
     fs,
     path::{Path, PathBuf},
-    str::FromStr,
 };
 
 use abscissa_core::{Command, Options, Runnable};

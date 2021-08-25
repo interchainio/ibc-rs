@@ -1,6 +1,7 @@
 //! Host chain types and methods, used by context mock.
 
-use std::convert::TryFrom;
+use crate::prelude::*;
+use core::convert::TryFrom;
 
 use tendermint::chain::Id as TMChainId;
 use tendermint_testgen::light_block::TmLightBlock;

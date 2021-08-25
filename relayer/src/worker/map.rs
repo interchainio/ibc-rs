@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use alloc::collections::btree_map::BTreeMap as HashMap;
 
 use crossbeam_channel::Sender;
 

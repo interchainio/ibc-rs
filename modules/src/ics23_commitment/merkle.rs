@@ -1,3 +1,4 @@
+use crate::prelude::*;
 use tendermint::merkle::proof::Proof;
 
 use ibc_proto::ibc::core::commitment::v1::MerklePath;
@@ -37,7 +38,7 @@ pub struct MerkleProof {
 //         #[derive(Clone, PartialEq, ::prost::Message)]
 //         pub struct MerkleProof {
 //             #[prost(message, optional, tag="1")]
-//             pub proof: ::std::option::Option<::tendermint_proto::crypto::ProofOps>,
+//             pub proof: ::core::option::Option<::tendermint_proto::crypto::ProofOps>,
 //         }
 //  - Vec<u8>: RawMerkleProof is not explicitly used but, serialized as Vec<u8>, it is
 //       included in all handshake messages that require proofs (i.e. all except the two `OpenInit`),
@@ -81,7 +82,7 @@ pub struct MerkleProof {
 // }
 
 pub fn convert_tm_to_ics_merkle_proof(tm_proof: &Proof) -> Result<RawMerkleProof, Error> {
-    let mut proofs = vec![];
+    let mut proofs = Vec::new();
 
     for op in &tm_proof.ops {
         let mut parsed = ibc_proto::ics23::CommitmentProof { proof: None };

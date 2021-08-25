@@ -3,6 +3,7 @@ use crate::ics04_channel::events::WriteAcknowledgement;
 use crate::ics04_channel::packet::{Packet, PacketResult, Sequence};
 use crate::ics04_channel::{context::ChannelReader, error::Error};
 use crate::ics24_host::identifier::{ChannelId, PortId};
+use crate::prelude::*;
 use crate::{
     events::IbcEvent,
     handler::{HandlerOutput, HandlerResult},
@@ -82,7 +83,8 @@ pub fn process(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryInto;
+    use crate::prelude::*;
+    use core::convert::TryInto;
     use test_env_log::test;
 
     use crate::ics02_client::height::Height;
@@ -117,7 +119,7 @@ mod tests {
         packet.data = vec![0];
 
         let ack = vec![0];
-        let ack_null = vec![];
+        let ack_null = Vec::new();
 
         let dest_channel_end = ChannelEnd::new(
             State::Open,

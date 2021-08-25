@@ -1,5 +1,5 @@
 use crate::util::retry::{clamp_total, ConstantGrowth};
-use std::time::Duration;
+use core::time::Duration;
 
 const MAX_DELAY: Duration = Duration::from_millis(500);
 const DELAY_INCR: Duration = Duration::from_millis(100);

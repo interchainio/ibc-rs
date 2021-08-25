@@ -1,4 +1,4 @@
-use std::time::Duration;
+use core::time::Duration;
 
 use crate::chain::counterparty::connection_state_on_destination;
 use crate::util::retry::RetryResult;

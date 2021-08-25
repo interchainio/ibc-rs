@@ -3,8 +3,10 @@
 pub mod reload;
 pub mod types;
 
-use std::collections::{HashMap, HashSet};
-use std::{fmt, fs, fs::File, io::Write, path::Path, time::Duration};
+use alloc::collections::BTreeMap as HashMap;
+use alloc::collections::BTreeSet as HashSet;
+use core::{fmt, time::Duration};
+use std::{fs, fs::File, io::Write, path::Path};
 
 use serde_derive::{Deserialize, Serialize};
 use tendermint_light_client::types::TrustThreshold;

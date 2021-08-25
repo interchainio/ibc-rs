@@ -13,6 +13,7 @@ use crate::ics24_host::identifier::{ChannelId, ClientId, ConnectionId, PortId};
 use crate::ics24_host::Path;
 use crate::mock::client_state::{MockClientState, MockConsensusState};
 use crate::mock::header::MockHeader;
+use crate::prelude::*;
 use crate::Height;
 
 #[derive(Clone, Debug, PartialEq, Eq)]

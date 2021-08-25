@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Error, Formatter};
+use core::fmt::{Debug, Error, Formatter};
 
 use abscissa_core::{Options, Runnable};
 use serde::Serialize;

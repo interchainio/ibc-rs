@@ -1,4 +1,4 @@
-use std::time::Duration;
+use core::time::Duration;
 
 use abscissa_core::{Command, Options, Runnable};
 

@@ -57,6 +57,7 @@ mod tests {
     use crate::ics26_routing::msgs::Ics26Envelope;
     use crate::mock::context::MockContext;
     use crate::mock::host::HostType;
+    use crate::prelude::*;
     use crate::Height;
     use test_env_log::test;
 

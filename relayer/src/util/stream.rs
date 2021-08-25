@@ -1,4 +1,5 @@
 use async_stream::stream;
+use core::mem;
 use futures::stream::Stream;
 
 /// ## Example
@@ -58,19 +59,19 @@ where
                             state = Some(State { cur: x, group: vec![] });
                         },
                         Some(state) if group_these(&state.cur, &x) => {
-                            let prev = std::mem::replace(&mut state.cur, x);
+                            let prev = mem::replace(&mut state.cur, x);
                             state.group.push(prev);
                         },
                         Some(state) => {
-                            let cur = std::mem::replace(&mut state.cur, x);
+                            let cur = mem::replace(&mut state.cur, x);
                             state.group.push(cur);
-                            let group = std::mem::take(&mut state.group);
+                            let group = mem::take(&mut state.group);
                             yield Ok(group);
                         }
                     }
                 }
                 Err(e) => {
-                    if let Some(cur_state) = std::mem::take(&mut state) {
+                    if let Some(cur_state) = mem::take(&mut state) {
                         if !cur_state.group.is_empty() {
                             yield Ok(cur_state.group);
                         }

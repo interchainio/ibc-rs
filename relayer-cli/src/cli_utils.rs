@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use alloc::sync::Arc;
 use tokio::runtime::Runtime as TokioRuntime;
 
 use ibc::ics02_client::client_state::ClientState;

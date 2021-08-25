@@ -1,5 +1,5 @@
-use std::str::FromStr;
-use std::sync::Arc;
+use alloc::sync::Arc;
+use core::str::FromStr;
 
 use abscissa_core::{Command, Options, Runnable};
 use tokio::runtime::Runtime as TokioRuntime;

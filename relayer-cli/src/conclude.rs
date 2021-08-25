@@ -55,7 +55,7 @@
 //! Output::success(h).with_result(end).exit();
 //! ```
 
-use std::fmt;
+use core::fmt;
 
 use serde::Serialize;
 use tracing::warn;
@@ -170,7 +170,7 @@ impl Output {
     /// Builder-style method for attaching a result to an output object.
     pub fn with_result<R>(mut self, result: R) -> Self
     where
-        R: Serialize + std::fmt::Debug + 'static,
+        R: Serialize + core::fmt::Debug + 'static,
     {
         if json() {
             self.result = Result::Json(serialize_result(result));
@@ -191,7 +191,7 @@ impl Output {
     /// input `result`.
     pub fn success<R>(result: R) -> Self
     where
-        R: Serialize + std::fmt::Debug + 'static,
+        R: Serialize + core::fmt::Debug + 'static,
     {
         Output::with_success().with_result(result)
     }
@@ -235,7 +235,7 @@ impl Output {
 }
 
 /// Helper to serialize a result into a `serde_json::Value`.
-fn serialize_result(res: impl Serialize + std::fmt::Debug) -> serde_json::Value {
+fn serialize_result(res: impl Serialize + core::fmt::Debug) -> serde_json::Value {
     let last_resort = format!("{:#?}", res);
 
     match serde_json::to_value(res) {

@@ -1,5 +1,6 @@
-use std::convert::{TryFrom, TryInto};
-use std::time::Duration;
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
+use core::time::Duration;
 
 use ibc_proto::ibc::core::connection::v1::MsgConnectionOpenInit as RawMsgConnectionOpenInit;
 use tendermint_proto::Protobuf;
@@ -83,6 +84,7 @@ impl From<MsgConnectionOpenInit> for RawMsgConnectionOpenInit {
 
 #[cfg(test)]
 pub mod test_util {
+    use crate::prelude::*;
     use ibc_proto::ibc::core::connection::v1::MsgConnectionOpenInit as RawMsgConnectionOpenInit;
 
     use crate::ics03_connection::msgs::conn_open_init::MsgConnectionOpenInit;
@@ -114,7 +116,8 @@ pub mod test_util {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     use ibc_proto::ibc::core::connection::v1::Counterparty as RawCounterparty;

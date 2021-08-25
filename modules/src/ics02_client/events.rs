@@ -122,8 +122,8 @@ impl Default for Attributes {
     }
 }
 
-impl std::fmt::Display for Attributes {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for Attributes {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(
             f,
             "h: {}, cs_h: {}({})",
@@ -160,8 +160,8 @@ impl From<CreateClient> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for CreateClient {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for CreateClient {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "{}", self.0)
     }
 }
@@ -209,8 +209,8 @@ impl From<UpdateClient> for IbcEvent {
     }
 }
 
-impl std::fmt::Display for UpdateClient {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for UpdateClient {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "{}", self.common)
     }
 }

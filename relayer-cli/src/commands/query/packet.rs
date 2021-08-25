@@ -1,5 +1,3 @@
-//! `query packet` subcommands
-
 use abscissa_core::{Command, Options, Runnable};
 
 mod ack;

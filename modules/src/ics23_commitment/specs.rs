@@ -1,6 +1,6 @@
-use ics23::ProofSpec;
-
+use crate::prelude::*;
 use ibc_proto::ics23::ProofSpec as ProtoProofSpec;
+use ics23::ProofSpec;
 
 /// An array of proof specifications.
 ///
@@ -30,7 +30,7 @@ impl ProofSpecs {
 /// TODO: fix with <https://github.com/informalsystems/ibc-rs/issues/853>
 impl From<ProofSpecs> for Vec<ProtoProofSpec> {
     fn from(domain_specs: ProofSpecs) -> Self {
-        let mut raw_specs = vec![];
+        let mut raw_specs = Vec::new();
         for ds in domain_specs.specs.iter() {
             // Both `ProofSpec` types implement trait `prost::Message`. Convert by encoding, then
             // decoding into the destination type.

@@ -1,5 +1,5 @@
-use std::cell::RefCell;
-use std::collections::VecDeque;
+use alloc::collections::VecDeque;
+use core::cell::RefCell;
 
 // A lightweight wrapper type to RefCell<VecDeque<T>> so that
 // we can safely mutate it with regular reference instead of

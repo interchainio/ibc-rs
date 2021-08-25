@@ -1,4 +1,4 @@
-use std::fmt;
+use core::fmt;
 
 use crossbeam_channel::Sender;
 use serde::{Deserialize, Serialize};

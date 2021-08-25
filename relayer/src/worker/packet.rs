@@ -1,4 +1,4 @@
-use std::time::Duration;
+use core::time::Duration;
 
 use crossbeam_channel::Receiver;
 use tracing::{error, info, trace, warn};

@@ -1,6 +1,7 @@
-use std::convert::{TryFrom, TryInto};
-use std::str::FromStr;
-use std::time::Duration;
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
+use core::str::FromStr;
+use core::time::Duration;
 
 use serde::{Deserialize, Serialize};
 use tendermint_proto::Protobuf;
@@ -26,7 +27,7 @@ pub struct ClientState {
     pub max_clock_drift: Duration,
     pub frozen_height: Height,
     pub latest_height: Height,
-    // pub proof_specs: ::std::vec::Vec<super::super::super::super::ics23::ProofSpec>,
+    // pub proof_specs: ::core::vec::Vec<super::super::super::super::ics23::ProofSpec>,
     pub upgrade_path: Vec<String>,
     pub allow_update: AllowUpdate,
 }
@@ -223,7 +224,9 @@ impl From<ClientState> for RawClientState {
 
 #[cfg(test)]
 mod tests {
-    use std::time::Duration;
+    use crate::prelude::*;
+    use core::time::Duration;
+    use std::println;
     use test_env_log::test;
 
     use tendermint_rpc::endpoint::abci_query::AbciQuery;
@@ -359,7 +362,8 @@ mod tests {
 
 #[cfg(any(test, feature = "mocks"))]
 pub mod test_util {
-    use std::time::Duration;
+    use crate::prelude::*;
+    use core::time::Duration;
 
     use tendermint::block::Header;
 

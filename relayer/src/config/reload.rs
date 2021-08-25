@@ -1,9 +1,7 @@
 //! Facility for reloading the relayer configuration.
 
-use std::{
-    path::PathBuf,
-    sync::{Arc, RwLock},
-};
+use alloc::sync::Arc;
+use std::{path::PathBuf, sync::RwLock};
 
 use crossbeam_channel::Sender;
 use itertools::Itertools;

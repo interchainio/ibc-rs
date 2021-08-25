@@ -1,7 +1,9 @@
-use std::cell::RefCell;
-use std::collections::{HashMap, VecDeque};
+use alloc::collections::BTreeMap as HashMap;
+use alloc::collections::VecDeque;
+use core::cell::RefCell;
+use core::fmt;
+use std::thread;
 use std::time::Instant;
-use std::{fmt, thread};
 
 use itertools::Itertools;
 use prost_types::Any;

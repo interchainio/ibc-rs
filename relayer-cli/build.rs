@@ -35,8 +35,8 @@ fn is_ci_release() -> bool {
 }
 
 mod git {
+    use core::marker::PhantomData;
     use std::ffi::OsStr;
-    use std::marker::PhantomData;
     use std::process::{Command, Output};
 
     // A wrapper over a git shell command that is only constructable if git is available & the

@@ -1,5 +1,6 @@
 use crate::events::IbcEvent;
-use std::marker::PhantomData;
+use crate::prelude::*;
+use core::marker::PhantomData;
 
 pub type HandlerResult<T, E> = Result<HandlerOutput<T>, E>;
 
@@ -26,8 +27,8 @@ pub struct HandlerOutputBuilder<T> {
 impl<T> HandlerOutputBuilder<T> {
     pub fn new() -> Self {
         Self {
-            log: vec![],
-            events: vec![],
+            log: Vec::new(),
+            events: Vec::new(),
             marker: PhantomData,
         }
     }

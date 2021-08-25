@@ -1,9 +1,8 @@
-use std::collections::HashMap;
-use std::fmt::Debug;
-
+use alloc::collections::btree_map::BTreeMap as HashMap;
+use core::fmt::Debug;
+use ibc::ics03_connection::connection::State as ConnectionState;
 use serde::{Deserialize, Deserializer};
 
-use ibc::ics03_connection::connection::State as ConnectionState;
 use ibc::Height;
 
 #[derive(Debug, Clone, Deserialize)]

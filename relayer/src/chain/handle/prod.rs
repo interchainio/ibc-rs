@@ -1,4 +1,4 @@
-use std::fmt::Debug;
+use core::fmt::Debug;
 
 use crossbeam_channel as channel;
 use serde::{Serialize, Serializer};

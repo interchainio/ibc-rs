@@ -1,5 +1,6 @@
-use std::collections::HashMap;
-use std::hash::Hash;
+use alloc::collections::BTreeMap as HashMap;
+use core::cmp::Ord;
+use core::hash::Hash;
 
 /// A change between two dictionaries.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -39,7 +40,7 @@ impl<K> Change<K> {
 /// Returns a list of changes holding on to the key affected by the change.
 pub fn diff<'a, K, V>(prev: &'a HashMap<K, V>, next: &'a HashMap<K, V>) -> Vec<Change<&'a K>>
 where
-    K: Hash + Eq,
+    K: Hash + Eq + Ord,
     V: Eq,
 {
     gdiff(prev, next, |a, b| a == b)
@@ -55,7 +56,7 @@ pub fn gdiff<'a, K, V, F>(
     eq: F,
 ) -> Vec<Change<&'a K>>
 where
-    K: Hash + Eq,
+    K: Hash + Eq + Ord,
     F: Fn(&'a V, &'a V) -> bool,
 {
     let mut changes = Vec::new();

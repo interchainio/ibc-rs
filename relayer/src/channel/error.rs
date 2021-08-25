@@ -1,9 +1,9 @@
+use core::time::Duration;
 use flex_error::define_error;
 use ibc::events::IbcEvent;
 use ibc::ics02_client::error::Error as ClientError;
 use ibc::ics04_channel::channel::State;
 use ibc::ics24_host::identifier::{ChainId, ChannelId, ClientId, PortChannelId, PortId};
-use std::time::Duration;
 
 use crate::error::Error;
 use crate::foreign_client::ForeignClientError;

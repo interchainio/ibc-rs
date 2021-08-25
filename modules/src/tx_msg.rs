@@ -1,9 +1,9 @@
+use crate::ics24_host::error::ValidationError;
+use crate::prelude::*;
 use prost_types::Any;
 
-use crate::ics24_host::error::ValidationError;
-
 pub trait Msg: Clone {
-    type ValidationError: std::error::Error;
+    type ValidationError;
     type Raw: From<Self> + prost::Message;
 
     // TODO: Clarify what is this function supposed to do & its connection to ICS26 routing mod.

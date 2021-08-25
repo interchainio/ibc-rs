@@ -1,5 +1,7 @@
-use crate::ics24_host::error::ValidationError;
+use crate::prelude::*;
 use flex_error::{define_error, DisplayOnly, TraceError};
+
+use crate::ics24_host::error::ValidationError;
 
 define_error! {
     #[derive(Debug, PartialEq, Eq)]

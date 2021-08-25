@@ -1,6 +1,7 @@
-use std::convert::{TryFrom, TryInto};
-use std::fmt;
-use std::str::FromStr;
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
+use core::fmt;
+use core::str::FromStr;
 
 use serde::{Deserialize, Serialize};
 use tendermint_proto::Protobuf;
@@ -88,7 +89,7 @@ impl Default for ChannelEnd {
             state: State::Uninitialized,
             ordering: Default::default(),
             remote: Counterparty::default(),
-            connection_hops: vec![],
+            connection_hops: Vec::new(),
             version: "".to_string(),
         }
     }
@@ -414,8 +415,8 @@ impl State {
 }
 
 /// Provides a `to_string` method.
-impl std::fmt::Display for State {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl core::fmt::Display for State {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> Result<(), core::fmt::Error> {
         write!(f, "{}", self.as_string())
     }
 }
@@ -442,8 +443,8 @@ pub fn validate_version(version: String) -> Result<String, Error> {
 
 #[cfg(test)]
 pub mod test_util {
-
     use crate::ics24_host::identifier::{ChannelId, ConnectionId, PortId};
+    use crate::prelude::*;
     use ibc_proto::ibc::core::channel::v1::Channel as RawChannel;
     use ibc_proto::ibc::core::channel::v1::Counterparty as RawCounterparty;
 
@@ -470,8 +471,9 @@ pub mod test_util {
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
-    use std::str::FromStr;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
+    use core::str::FromStr;
     use test_env_log::test;
 
     use ibc_proto::ibc::core::channel::v1::Channel as RawChannel;

@@ -141,7 +141,8 @@ pub fn process(ctx: &dyn ChannelReader, msg: MsgRecvPacket) -> HandlerResult<Pac
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     use crate::ics03_connection::connection::ConnectionEnd;
@@ -187,7 +188,7 @@ mod tests {
             source_channel: ChannelId::default(),
             destination_port: PortId::default(),
             destination_channel: ChannelId::default(),
-            data: vec![],
+            data: Vec::new(),
             timeout_height: client_height,
             timeout_timestamp: Timestamp::from_nanoseconds(1).unwrap(),
         };

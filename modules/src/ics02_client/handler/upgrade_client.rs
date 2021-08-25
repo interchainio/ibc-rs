@@ -11,6 +11,7 @@ use crate::ics02_client::events::Attributes;
 use crate::ics02_client::handler::ClientResult;
 use crate::ics02_client::msgs::upgrade_client::MsgUpgradeAnyClient;
 use crate::ics24_host::identifier::ClientId;
+use crate::prelude::*;
 
 /// The result following the successful processing of a `MsgUpgradeAnyClient` message.
 /// This data type should be used with a qualified name `upgrade_client::Result` to avoid ambiguity.
@@ -78,7 +79,9 @@ pub fn process(
 
 #[cfg(test)]
 mod tests {
-    use std::{convert::TryFrom, str::FromStr};
+    use crate::prelude::*;
+    use core::convert::TryFrom;
+    use core::str::FromStr;
 
     use crate::events::IbcEvent;
     use crate::handler::HandlerOutput;

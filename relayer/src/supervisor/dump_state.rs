@@ -1,4 +1,5 @@
-use std::{collections::BTreeMap, fmt};
+use alloc::collections::BTreeMap;
+use alloc::fmt;
 
 use ibc::ics24_host::identifier::ChainId;
 use itertools::Itertools;

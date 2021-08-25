@@ -4,7 +4,7 @@
 //! application's configuration file and/or command-line options
 //! for specifying it.
 
-use std::collections::BTreeSet;
+use alloc::collections::BTreeSet;
 use std::path::PathBuf;
 
 use flex_error::{define_error, TraceError};

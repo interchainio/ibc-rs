@@ -1,5 +1,5 @@
-use std::convert::{TryFrom, TryInto};
-
+use crate::prelude::*;
+use core::convert::{TryFrom, TryInto};
 use tendermint_proto::Protobuf;
 
 use ibc_proto::ibc::core::channel::v1::MsgTimeout as RawMsgTimeout;
@@ -122,7 +122,8 @@ pub mod test_util {
 
 #[cfg(test)]
 mod test {
-    use std::convert::{TryFrom, TryInto};
+    use crate::prelude::*;
+    use core::convert::{TryFrom, TryInto};
     use test_env_log::test;
 
     use ibc_proto::ibc::core::channel::v1::MsgTimeout as RawMsgTimeout;
@@ -160,7 +161,7 @@ mod test {
             Test {
                 name: "Missing proof".to_string(),
                 raw: RawMsgTimeout {
-                    proof_unreceived: vec![],
+                    proof_unreceived: Vec::new(),
                     ..default_raw_msg.clone()
                 },
                 want_pass: false,

@@ -10,6 +10,7 @@ use crate::ics04_channel::msgs::acknowledgement::MsgAcknowledgement;
 use crate::ics04_channel::packet::{PacketResult, Sequence};
 use crate::ics04_channel::{context::ChannelReader, error::Error};
 use crate::ics24_host::identifier::{ChannelId, PortId};
+use crate::prelude::*;
 
 #[derive(Clone, Debug)]
 pub struct AckPacketResult {
@@ -131,7 +132,6 @@ pub fn process(
 
 #[cfg(test)]
 mod tests {
-
     use crate::events::IbcEvent;
     use crate::ics02_client::height::Height;
     use crate::ics03_connection::connection::ConnectionEnd;
@@ -145,10 +145,11 @@ mod tests {
     use crate::ics04_channel::msgs::acknowledgement::MsgAcknowledgement;
     use crate::ics24_host::identifier::{ChannelId, ClientId, ConnectionId, PortId};
     use crate::mock::context::MockContext;
+    use crate::prelude::*;
     use crate::timestamp::ZERO_DURATION;
     use test_env_log::test;
 
-    use std::convert::TryFrom;
+    use core::convert::TryFrom;
 
     #[test]
     fn ack_packet_processing() {

@@ -10,6 +10,7 @@ use crate::ics03_connection::handler::verify::{check_client_consensus_height, ve
 use crate::ics03_connection::handler::{ConnectionIdState, ConnectionResult};
 use crate::ics03_connection::msgs::conn_open_try::MsgConnectionOpenTry;
 use crate::ics24_host::identifier::ConnectionId;
+use crate::prelude::*;
 
 pub(crate) fn process(
     ctx: &dyn ConnectionReader,
@@ -119,7 +120,8 @@ pub(crate) fn process(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::TryFrom;
+    use crate::prelude::*;
+    use core::convert::TryFrom;
     use test_env_log::test;
 
     use crate::events::IbcEvent;

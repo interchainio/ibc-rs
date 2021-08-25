@@ -1,3 +1,5 @@
+extern crate alloc;
+
 mod runner;
 
 use modelator::{run_tla_steps, ModelChecker, TestError};

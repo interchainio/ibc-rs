@@ -1,4 +1,4 @@
-use std::{path::PathBuf, process};
+use core::{path::PathBuf, process};
 
 use git2::{Oid, Repository};
 

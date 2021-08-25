@@ -1,9 +1,9 @@
-use std::convert::TryFrom;
-
-use serde::{Deserialize, Serialize};
-use tendermint_proto::Protobuf;
+use crate::prelude::*;
+use core::convert::TryFrom;
 
 use ibc_proto::ibc::core::connection::v1::Version as RawVersion;
+use serde::{Deserialize, Serialize};
+use tendermint_proto::Protobuf;
 
 use crate::ics03_connection::error::Error;
 
@@ -71,7 +71,7 @@ pub fn pick_version(
     supported_versions: Vec<Version>,
     counterparty_versions: Vec<Version>,
 ) -> Option<Version> {
-    let mut intersection: Vec<Version> = vec![];
+    let mut intersection: Vec<Version> = Vec::new();
     for s in supported_versions.iter() {
         for c in counterparty_versions.iter() {
             if c.identifier != s.identifier {
@@ -90,7 +90,8 @@ pub fn pick_version(
 
 #[cfg(test)]
 mod tests {
-    use std::convert::{TryFrom, TryInto};
+    use crate::prelude::*;
+    use core::convert::{TryFrom, TryInto};
     use test_env_log::test;
 
     use ibc_proto::ibc::core::connection::v1::Version as RawVersion;
@@ -133,11 +134,11 @@ mod tests {
                 Version::default(),
                 Version {
                     identifier: "3".to_string(),
-                    features: vec![],
+                    features: Vec::new(),
                 },
                 Version {
                     identifier: "4".to_string(),
-                    features: vec![],
+                    features: Vec::new(),
                 },
             ]
             .into_iter()
@@ -145,15 +146,15 @@ mod tests {
             vec![
                 Version {
                     identifier: "2".to_string(),
-                    features: vec![],
+                    features: Vec::new(),
                 },
                 Version {
                     identifier: "4".to_string(),
-                    features: vec![],
+                    features: Vec::new(),
                 },
                 Version {
                     identifier: "3".to_string(),
-                    features: vec![],
+                    features: Vec::new(),
                 },
             ]
             .into_iter()
@@ -161,7 +162,7 @@ mod tests {
             // Should pick version 3 as it's the lowest of the intersection {3, 4}
             Version {
                 identifier: "3".to_string(),
-                features: vec![],
+                features: Vec::new(),
             },
         )
     }
@@ -170,13 +171,13 @@ mod tests {
         (
             vec![Version {
                 identifier: "1".to_string(),
-                features: vec![],
+                features: Vec::new(),
             }]
             .into_iter()
             .collect(),
             vec![Version {
                 identifier: "2".to_string(),
-                features: vec![],
+                features: Vec::new(),
             }]
             .into_iter()
             .collect(),
@@ -213,7 +214,7 @@ mod tests {
             },
             Test {
                 name: "Bad versions empty".to_string(),
-                versions: vec![],
+                versions: Vec::new(),
                 want_pass: true,
             },
         ];

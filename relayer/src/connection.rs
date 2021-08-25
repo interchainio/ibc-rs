@@ -40,7 +40,7 @@ define_error! {
             |e| { format_args!("relayer error: {}", e.source) },
 
         MissingLocalConnectionId
-            |_| { "failed due to missing local channel id" },
+            |_| { "failed due to missing local connection id" },
 
         MissingCounterpartyConnectionIdField
             { counterparty: Counterparty }

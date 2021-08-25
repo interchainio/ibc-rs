@@ -27,7 +27,7 @@ pub mod prelude;
 
 pub mod error;
 
-pub(crate) mod cli_utils;
+pub mod cli_utils;
 pub(crate) mod components;
 pub(crate) mod conclude;
 pub(crate) mod entry;

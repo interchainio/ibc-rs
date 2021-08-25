@@ -12,14 +12,33 @@ use crate::tx_msg::Msg;
 
 pub const TYPE_URL: &str = "/ibc.core.channel.v1.MsgTimeout";
 
-///
-/// Message definition for packet timeout domain type.
-///
+/*
+    Message definition for packet timeout domain type.
+
+    A `MsgTimeout` is part of `PacketMsg` representing an
+    INCOMING timeout packet RECEIVED BY the ALPHA chain
+    and SENT FROM the BETA chain.
+ */
 #[derive(Clone, Debug, PartialEq)]
 pub struct MsgTimeout {
+    /*
+        An INCOMING packet with the SAME ALPHA and BETA chains.
+     */
     pub packet: Packet,
+
+    /*
+        The sequence number ON the ALPHA chain.
+     */
     pub next_sequence_recv: Sequence,
+
+    /*
+        The proof FROM the BETA chain proving the timeout.
+     */
     pub proofs: Proofs,
+
+    /*
+        The signer FOR the ALPHA chain.
+     */
     pub signer: Signer,
 }
 

@@ -39,10 +39,47 @@ pub enum ChannelMsg {
     ChannelCloseConfirm(MsgChannelCloseConfirm),
 }
 
+/*
+    `PacketMsg` represents packet messages sent between an ALPHA chain
+    and a BETA chain.
+
+    The roles of ALPHA and BETA are FIXED and never change during
+    the relaying session. DIFFERENT relaying sessions are executed
+    for the case where the ALPHA and BETA roles are FLIPPED
+
+    Depending on the variant, a packet can flow in *either* direction,
+    and the exact flow is documented below.
+
+    All variants are parameterized by the SAME ALPHA and BETA
+    chains, i.e. the chain roles DO NOT FLIP.
+
+    In the same relaying session, the packet's ALPHA chain is
+    ALWAYS the SOURCE chain, and the packet's BETA
+    chain is ALWAYS the DESTINATION chain.
+*/
 #[derive(Clone, Debug, PartialEq)]
 pub enum PacketMsg {
+    /*
+        A `RecvPacket` represents the ALPHA chain RECEIVING
+        an INCOMING packet from the BETA chain.
+     */
     RecvPacket(MsgRecvPacket),
+
+    /*
+        An `AckPacket` represents the ALPHA chain SENDING
+        an acknowlegement as OUTGOING packet to the BETA chain.
+    */
     AckPacket(MsgAcknowledgement),
+
+    /*
+        A `ToPacket` represents the ALPHA chain RECEIVING
+        a timeout INCOMING packet from the BETA chain.
+     */
     ToPacket(MsgTimeout),
+
+    /*
+        A `ToClosePacket` represents the ALPHA chain RECEIVING
+        a timeout-on-close INCOMING packet from the BETA chain.
+     */
     ToClosePacket(MsgTimeoutOnClose),
 }

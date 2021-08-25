@@ -12,13 +12,28 @@ use crate::tx_msg::Msg;
 
 pub const TYPE_URL: &str = "/ibc.core.channel.v1.MsgRecvPacket";
 
-///
-/// Message definition for the "packet receiving" datagram.
-///
+/*
+    Message definition for the "packet receiving" datagram.
+
+    A `MsgRecvPacket` is part of a `PacketMsg` which represents
+    an INCOMING packet RECEIVED by the ALPHA chain
+    and SENT from the BETA chain.
+ */
 #[derive(Clone, Debug, PartialEq)]
 pub struct MsgRecvPacket {
+    /*
+        An INCOMING packet with the ALPHA and BETA chains remain the SAME.
+     */
     pub packet: Packet,
+
+    /*
+        A proof that is produced FROM the BETA chain.
+     */
     pub proofs: Proofs,
+
+    /*
+        A signer FOR the ALPHA chain.
+     */
     pub signer: Signer,
 }
 

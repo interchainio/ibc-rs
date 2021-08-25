@@ -15,13 +15,28 @@ use super::handler::{
     timeout::TimeoutPacketResult, write_acknowledgement::WriteAckPacketResult,
 };
 
-/// Enumeration of proof carrying ICS4 message, helper for relayer.
+/*
+    Enumeration of proof carrying ICS4 message, helper for relayer.
+
+    The `PacketMsgType` is used for identifying the message type
+    for packets sent between an ALPHA chain an a BETA chain.
+
+    It also identifies the DIRECTION on the packet, on whether
+    it is an INCOMING or OUTGOING packet.
+ */
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PacketMsgType {
+    // INCOMING packet
     Recv,
+
+    // OUTGOING packet
     Ack,
     TimeoutUnordered,
+
+    // INCOMING packet
     TimeoutOrdered,
+
+    // INCOMING packet
     TimeoutOnClose,
 }
 
@@ -99,16 +114,84 @@ impl std::fmt::Display for Sequence {
     }
 }
 
+/*
+    A `Packet` represents datagrams flowing between
+    a HOST chain and a COUNTERPARTY chain.
+    It is in fact used in TWO DIRECTIONS: INCOMING and OUTGOING.
+
+    When using a packet, one must identify the HOST chain,
+    the COUNTERPARTY chain, *and* also the DIRECTION.
+    Inside a relaying session, the HOST and COUNTERPARTY
+    chains of the packets remain FIXED and are NEVER FLIPPED.
+
+    Depending on the packet mode, some fields in `Packet`
+    belongs to DIFFERENT chain. This is further noted below.
+ */
 #[derive(PartialEq, Deserialize, Serialize, Hash, Clone)]
 pub struct Packet {
+    /*
+        When the DIRECTION is INCOMING, the sequence field
+        identifies the sequence on the COUNTERPARTY chain.
+
+        When the DIRECTION is OUTGOING, the sequence field
+        identifies the sequence on the HOST chain.
+     */
     pub sequence: Sequence,
+
+    /*
+        The source port is the port ID for the COUNTERPARTY chain
+        that is REGISTERED ON the HOST chain.
+     */
     pub source_port: PortId,
+
+    /*
+        The source channel is the channel ID for the COUNTERPARTY chain
+        that is REGISTERED ON the HOST chain.
+     */
     pub source_channel: ChannelId,
+
+    /*
+        The destination port is the port ID for the HOST chain
+        that is REGISTERED ON the COUNTERPARTY chain.
+     */
     pub destination_port: PortId,
+
+    /*
+        The destination channel is the channel ID for the
+        HOST chain that is REGISTERD ON the COUNTERPARTY chain.
+     */
     pub destination_channel: ChannelId,
     #[serde(serialize_with = "crate::serializers::ser_hex_upper")]
+
+    /*
+        If the DIRECTION is INCOMING, the data is PRODUCED BY
+        the COUNTERPARTY chain.
+
+        If the DIRECTION is OUTGOING, the data is PRODUCED BY
+        the HOST chain.
+     */
     pub data: Vec<u8>,
+
+    /*
+        If the DIRECTION is INCOMING, this is the TIMEOUT HEIGHT
+        of the HOST chain. If the HOST chain PROCESS the packet
+        after it reaches the TIMEOUT HEIGHT, it REJECTs the packet.
+
+        If the DIRECTION is OUTGOING, this is the TIMEOUT HEIGHT
+        of the COUNTERPARTY chain. If the COUNTERPARTY chain PROCESS the packet
+        after it reaches the TIMEOUT HEIGHT, it REJECTs the packet.
+     */
     pub timeout_height: Height,
+
+    /*
+        If the DIRECTION is INCOMING, and if the HOST chain PROCESS
+        the packet with the local timestamp later than the given timeout timestamp,
+        it REJECTs the packet.
+
+        If the DIRECTION is OUTGOING, and if the COUNTERPARTY chain PROCESS
+        the packet with the local timestamp later than the given timeout timestamp,
+        it REJECTs the packet.
+     */
     pub timeout_timestamp: Timestamp,
 }
 

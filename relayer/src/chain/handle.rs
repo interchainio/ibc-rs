@@ -305,6 +305,21 @@ pub enum ChainRequest {
     },
 }
 
+/*
+    A ChainHandle is used in the context of a HOST chain and
+    a COUNTERPARTY chain.
+
+    The HOST chain is the chain that the underlying ChainHandle
+    implementation is communicating to.
+
+    The COUNTERPARTY chain is the chain that exist as an
+    IBC CLIENT on the HOST chain.
+
+    While a HOST chain can have many COUNTERPARTY chains, in a
+    single relaying session, the COUNTERPARTY chain is ALWAYS FIXED.
+    i.e. other than the registry glue code, the relayer code itself
+    DO NOT use a ChainHandle with multiple COUNTERPARTY chains.
+ */
 pub trait ChainHandle: Clone + Send + Sync + Serialize + Debug {
     fn new(chain_id: ChainId, sender: channel::Sender<ChainRequest>) -> Self;
 
@@ -479,12 +494,33 @@ pub trait ChainHandle: Clone + Send + Sync + Serialize + Debug {
         height: Height,
     ) -> Result<Proofs, Error>;
 
+    /*
+        Build packet proofs, depending on the DIRECTION identified by `packet_type`
+     */
     fn build_packet_proofs(
         &self,
         packet_type: PacketMsgType,
+
+        /*
+            The port ID of the COUNTERPARTY chain on the HOST chain
+         */
         port_id: &PortId,
+
+        /*
+            The channel ID of the COUNTERPARTY chain on the HOST chain
+         */
         channel_id: &ChannelId,
+
+        /*
+            If the direction is INCOMING, this is the sequence from the COUNTERPARTY chain.
+
+            If the direction is OUTGOING, this is the sequence from the HOST chain.
+         */
         sequence: Sequence,
+
+        /*
+            The height on the HOST chain
+         */
         height: Height,
     ) -> Result<(Vec<u8>, Proofs), Error>;
 

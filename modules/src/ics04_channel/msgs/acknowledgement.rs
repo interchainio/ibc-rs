@@ -12,14 +12,31 @@ use crate::tx_msg::Msg;
 
 pub const TYPE_URL: &str = "/ibc.core.channel.v1.MsgAcknowledgement";
 
-///
-/// Message definition for packet acknowledgements.
-///
+/*
+    A `MsgRecvPacket` is part of a `PacketMsg` which represents
+    an OUTGOING acknowledgment packet SENT by the ALPHA chain to
+    the BETA chain.
+ */
 #[derive(Clone, Debug, PartialEq)]
 pub struct MsgAcknowledgement {
+    /*
+        An OUTGOING packet with the SAME ALPHA and BETA chains.
+     */
     pub packet: Packet,
+
+    /*
+        The acknowlegement PRODUCED BY the ALPHA chain.
+     */
     pub acknowledgement: Vec<u8>, // TODO(romac): Introduce a newtype for this
+
+    /*
+        The proof of acknowledgement PRODUCED BY the ALPHA chain.
+     */
     pub proofs: Proofs,
+
+    /*
+        The signer FOR the BETA chain.
+     */
     pub signer: Signer,
 }
 

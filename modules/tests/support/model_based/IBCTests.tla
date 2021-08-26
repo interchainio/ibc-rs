@@ -59,9 +59,6 @@ ICS03MissingClientConsensusStateTest ==
 ICS03ConnectionOpenAckOKTest ==
     /\ actionOutcome = "Ics03ConnectionOpenAckOk"
 
-ICS03UninitializedConnectionTest ==
-    /\ actionOutcome = "Ics03UninitializedConnection"
-
 \* ICS03ConnectionOpenConfirm tests
 ICS03ConnectionOpenConfirmOKTest ==
     /\ actionOutcome = "Ics03ConnectionOpenConfirmOk"

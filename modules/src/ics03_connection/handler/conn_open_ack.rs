@@ -19,72 +19,58 @@ pub(crate) fn process(
     // Check the client's (consensus state) proof height.
     check_client_consensus_height(ctx, msg.consensus_height())?;
 
-    // Unwrap the old connection end & validate it.
-    let mut new_conn_end = match ctx.connection_end(msg.connection_id()) {
-        // A connection end must exist and must be Init or TryOpen; otherwise we return an error.
-        Some(old_conn_end) => {
-            // Check if the connection state is either Init or TryOpen and message version
-            // is compatible.
-            let state_is_consistent = old_conn_end.state_matches(&State::Init)
-                && old_conn_end.versions().contains(msg.version())
-                || old_conn_end.state_matches(&State::TryOpen)
-                    && old_conn_end.versions().get(0).eq(&Some(msg.version()));
+    // Validate the connection end.
+    let mut conn_end = ctx.connection_end(msg.connection_id())?;
+    // A connection end must be Init or TryOpen; otherwise we return an error.
+    let state_is_consistent = conn_end.state_matches(&State::Init)
+        && conn_end.versions().contains(msg.version())
+        || conn_end.state_matches(&State::TryOpen)
+            && conn_end.versions().get(0).eq(&Some(msg.version()));
+    // Check that, if we have a counterparty connection id, then it matches the one in the message.
+    let counterparty_matches =
+        if let Some(counterparty_connection_id) = conn_end.counterparty().connection_id() {
+            &msg.counterparty_connection_id == counterparty_connection_id
+        } else {
+            true
+        };
 
-            // Check that, if we have a counterparty connection id, then it
-            // matches the one in the message.
-            let counterparty_matches = if let Some(counterparty_connection_id) =
-                old_conn_end.counterparty().connection_id()
-            {
-                &msg.counterparty_connection_id == counterparty_connection_id
-            } else {
-                true
-            };
-
-            if state_is_consistent && counterparty_matches {
-                Ok(old_conn_end)
-            } else {
-                // Old connection end is in incorrect state, propagate the error.
-                Err(Error::connection_mismatch(msg.connection_id().clone()))
-            }
-        }
-        None => {
-            // No connection end exists for this conn. identifier. Impossible to continue handshake.
-            Err(Error::uninitialized_connection(msg.connection_id().clone()))
-        }
-    }?;
+    if !state_is_consistent || !counterparty_matches {
+        // Old connection end is in incorrect state, propagate the error.
+        return Err(Error::connection_mismatch(msg.connection_id().clone()));
+    }
 
     // Proof verification.
     let expected_conn = ConnectionEnd::new(
         State::TryOpen,
-        new_conn_end.counterparty().client_id().clone(),
+        conn_end.counterparty().client_id().clone(),
         Counterparty::new(
             // The counterparty is the local chain.
-            new_conn_end.client_id().clone(), // The local client identifier.
+            conn_end.client_id().clone(), // The local client identifier.
             Some(msg.counterparty_connection_id().clone()), // This chain's connection id as known on counterparty.
             ctx.commitment_prefix(),                        // Local commitment prefix.
         ),
         vec![msg.version().clone()],
-        new_conn_end.delay_period(),
+        conn_end.delay_period(),
     );
 
     // 2. Pass the details to the verification function.
     verify_proofs(
         ctx,
         msg.client_state(),
-        &new_conn_end,
+        &conn_end,
         &expected_conn,
         msg.proofs(),
     )?;
 
     output.log("success: connection verification passed");
 
-    new_conn_end.set_state(State::Open);
-    new_conn_end.set_version(msg.version().clone());
+    conn_end.set_state(State::Open);
+    conn_end.set_version(msg.version().clone());
 
     let result = ConnectionResult {
         connection_id: msg.connection_id().clone(),
         connection_id_state: ConnectionIdState::Reused,
-        connection_end: new_conn_end,
+        connection_end: conn_end,
     };
 
     let event_attributes = Attributes {
@@ -193,11 +179,11 @@ mod tests {
                     let connection_id = conn_id.clone();
                     Box::new(move |e| {
                         match e.detail() {
-                            error::ErrorDetail::UninitializedConnection(e) => {
+                            error::ErrorDetail::ConnectionNotFound(e) => {
                                 assert_eq!(e.connection_id, connection_id)
                             }
                             _ => {
-                                panic!("Expected UninitializedConnection error");
+                                panic!("Expected ConnectionNotFound error");
                             }
                         }
                     })

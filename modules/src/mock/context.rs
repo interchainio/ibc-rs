@@ -16,13 +16,14 @@ use crate::ics02_client::error::Error as Ics02Error;
 use crate::ics02_client::header::AnyHeader;
 use crate::ics03_connection::connection::ConnectionEnd;
 use crate::ics03_connection::context::{ConnectionKeeper, ConnectionReader};
-use crate::ics03_connection::error::Error as Ics3Error;
+use crate::ics03_connection::error::Error as Ics03Error;
 use crate::ics04_channel::channel::ChannelEnd;
 use crate::ics04_channel::context::{ChannelKeeper, ChannelReader};
-use crate::ics04_channel::error::Error as ChannelError;
+use crate::ics04_channel::error::Error as Ics04Error;
 use crate::ics04_channel::packet::{Receipt, Sequence};
 use crate::ics05_port::capabilities::Capability;
 use crate::ics05_port::context::PortReader;
+use crate::ics05_port::error::Error as Ics05Error;
 use crate::ics07_tendermint::client_state::test_util::get_dummy_tendermint_client_state;
 use crate::ics18_relayer::context::Ics18Context;
 use crate::ics18_relayer::error::Error as Ics18Error;
@@ -436,8 +437,11 @@ impl Ics26Context for MockContext {}
 impl Ics20Context for MockContext {}
 
 impl PortReader for MockContext {
-    fn lookup_module_by_port(&self, port_id: &PortId) -> Option<Capability> {
-        self.port_capabilities.get(port_id).cloned()
+    fn lookup_module_by_port(&self, port_id: &PortId) -> Result<Capability, Ics05Error> {
+        match self.port_capabilities.get(port_id) {
+            Some(cap) => Ok(cap.clone()),
+            None => Err(Ics05Error::unknown_port(port_id.clone())),
+        }
     }
 
     fn authenticate(&self, _cap: &Capability, _port_id: &PortId) -> bool {
@@ -446,66 +450,121 @@ impl PortReader for MockContext {
 }
 
 impl ChannelReader for MockContext {
-    fn channel_end(&self, pcid: &(PortId, ChannelId)) -> Option<ChannelEnd> {
-        self.channels.get(pcid).cloned()
+    fn channel_end(&self, pcid: &(PortId, ChannelId)) -> Result<ChannelEnd, Ics04Error> {
+        match self.channels.get(pcid) {
+            Some(channel_end) => Ok(channel_end.clone()),
+            None => Err(Ics04Error::channel_not_found(
+                pcid.0.clone(),
+                pcid.1.clone(),
+            )),
+        }
     }
 
-    fn connection_end(&self, cid: &ConnectionId) -> Option<ConnectionEnd> {
-        self.connections.get(cid).cloned()
+    fn connection_end(&self, cid: &ConnectionId) -> Result<ConnectionEnd, Ics04Error> {
+        match self.connections.get(cid) {
+            Some(connection_end) => Ok(connection_end.clone()),
+            None => Err(Ics04Error::missing_connection(cid.clone())),
+        }
     }
 
-    fn connection_channels(&self, cid: &ConnectionId) -> Option<Vec<(PortId, ChannelId)>> {
-        self.connection_channels.get(cid).cloned()
+    fn connection_channels(
+        &self,
+        cid: &ConnectionId,
+    ) -> Result<Vec<(PortId, ChannelId)>, Ics04Error> {
+        match self.connection_channels.get(cid) {
+            Some(pcid) => Ok(pcid.clone()),
+            None => Err(Ics04Error::missing_channel()),
+        }
     }
 
-    fn client_state(&self, client_id: &ClientId) -> Option<AnyClientState> {
+    fn client_state(&self, client_id: &ClientId) -> Result<AnyClientState, Ics04Error> {
         ClientReader::client_state(self, client_id)
+            .map_err(|_| Ics04Error::missing_client_state(client_id.clone()))
     }
 
     fn client_consensus_state(
         &self,
         client_id: &ClientId,
         height: Height,
-    ) -> Option<AnyConsensusState> {
+    ) -> Result<AnyConsensusState, Ics04Error> {
         ClientReader::consensus_state(self, client_id, height)
+            .map_err(|_| Ics04Error::missing_client_consensus_state(client_id.clone(), height))
     }
 
-    fn authenticated_capability(&self, port_id: &PortId) -> Result<Capability, ChannelError> {
-        let cap = PortReader::lookup_module_by_port(self, port_id);
-        match cap {
-            Some(key) => {
+    fn authenticated_capability(&self, port_id: &PortId) -> Result<Capability, Ics04Error> {
+        match PortReader::lookup_module_by_port(self, port_id) {
+            Ok(key) => {
                 if !PortReader::authenticate(self, &key, port_id) {
-                    Err(ChannelError::invalid_port_capability())
+                    Err(Ics04Error::invalid_port_capability())
                 } else {
                     Ok(key)
                 }
             }
-            None => Err(ChannelError::no_port_capability(port_id.clone())),
+            Err(e) if e.detail() == Ics05Error::unknown_port(port_id.clone()).detail() => {
+                Err(Ics04Error::no_port_capability(port_id.clone()))
+            }
+            Err(_) => Err(Ics04Error::implementation_specific()),
         }
     }
 
-    fn get_next_sequence_send(&self, port_channel_id: &(PortId, ChannelId)) -> Option<Sequence> {
-        self.next_sequence_send.get(port_channel_id).cloned()
+    fn get_next_sequence_send(
+        &self,
+        port_channel_id: &(PortId, ChannelId),
+    ) -> Result<Sequence, Ics04Error> {
+        match self.next_sequence_send.get(port_channel_id) {
+            Some(sequence) => Ok(*sequence),
+            None => Err(Ics04Error::missing_next_send_seq()),
+        }
     }
 
-    fn get_next_sequence_recv(&self, port_channel_id: &(PortId, ChannelId)) -> Option<Sequence> {
-        self.next_sequence_recv.get(port_channel_id).cloned()
+    fn get_next_sequence_recv(
+        &self,
+        port_channel_id: &(PortId, ChannelId),
+    ) -> Result<Sequence, Ics04Error> {
+        match self.next_sequence_recv.get(port_channel_id) {
+            Some(sequence) => Ok(*sequence),
+            None => Err(Ics04Error::missing_next_recv_seq()),
+        }
     }
 
-    fn get_next_sequence_ack(&self, port_channel_id: &(PortId, ChannelId)) -> Option<Sequence> {
-        self.next_sequence_ack.get(port_channel_id).cloned()
+    fn get_next_sequence_ack(
+        &self,
+        port_channel_id: &(PortId, ChannelId),
+    ) -> Result<Sequence, Ics04Error> {
+        match self.next_sequence_ack.get(port_channel_id) {
+            Some(sequence) => Ok(*sequence),
+            None => Err(Ics04Error::missing_next_ack_seq()),
+        }
     }
 
-    fn get_packet_commitment(&self, key: &(PortId, ChannelId, Sequence)) -> Option<String> {
-        self.packet_commitment.get(key).cloned()
+    fn get_packet_commitment(
+        &self,
+        key: &(PortId, ChannelId, Sequence),
+    ) -> Result<String, Ics04Error> {
+        match self.packet_commitment.get(key) {
+            Some(commitment) => Ok(commitment.clone()),
+            None => Err(Ics04Error::packet_commitment_not_found(key.2)),
+        }
     }
 
-    fn get_packet_receipt(&self, key: &(PortId, ChannelId, Sequence)) -> Option<Receipt> {
-        self.packet_receipt.get(key).cloned()
+    fn get_packet_receipt(
+        &self,
+        key: &(PortId, ChannelId, Sequence),
+    ) -> Result<Receipt, Ics04Error> {
+        match self.packet_receipt.get(key) {
+            Some(receipt) => Ok(receipt.clone()),
+            None => Err(Ics04Error::packet_receipt_not_found(key.2)),
+        }
     }
 
-    fn get_packet_acknowledgement(&self, key: &(PortId, ChannelId, Sequence)) -> Option<String> {
-        self.packet_acknowledgement.get(key).cloned()
+    fn get_packet_acknowledgement(
+        &self,
+        key: &(PortId, ChannelId, Sequence),
+    ) -> Result<String, Ics04Error> {
+        match self.packet_acknowledgement.get(key) {
+            Some(ack) => Ok(ack.clone()),
+            None => Err(Ics04Error::packet_acknowledgement_not_found(key.2)),
+        }
     }
 
     fn hash(&self, input: String) -> String {
@@ -521,8 +580,8 @@ impl ChannelReader for MockContext {
         self.timestamp
     }
 
-    fn channel_counter(&self) -> u64 {
-        self.channel_ids_counter
+    fn channel_counter(&self) -> Result<u64, Ics04Error> {
+        Ok(self.channel_ids_counter)
     }
 }
 
@@ -533,7 +592,7 @@ impl ChannelKeeper for MockContext {
         timeout_timestamp: Timestamp,
         timeout_height: Height,
         data: Vec<u8>,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         let input = format!("{:?},{:?},{:?}", timeout_timestamp, timeout_height, data);
         self.packet_commitment
             .insert(key, ChannelReader::hash(self, input));
@@ -544,7 +603,7 @@ impl ChannelKeeper for MockContext {
         &mut self,
         key: (PortId, ChannelId, Sequence),
         ack: Vec<u8>,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         let input = format!("{:?}", ack);
         self.packet_acknowledgement
             .insert(key, ChannelReader::hash(self, input));
@@ -554,7 +613,7 @@ impl ChannelKeeper for MockContext {
     fn delete_packet_acknowledgement(
         &mut self,
         key: (PortId, ChannelId, Sequence),
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.packet_acknowledgement.remove(&key);
         Ok(())
     }
@@ -563,7 +622,7 @@ impl ChannelKeeper for MockContext {
         &mut self,
         cid: ConnectionId,
         port_channel_id: &(PortId, ChannelId),
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.connection_channels
             .entry(cid)
             .or_insert_with(Vec::new)
@@ -575,7 +634,7 @@ impl ChannelKeeper for MockContext {
         &mut self,
         port_channel_id: (PortId, ChannelId),
         channel_end: &ChannelEnd,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.channels.insert(port_channel_id, channel_end.clone());
         Ok(())
     }
@@ -584,7 +643,7 @@ impl ChannelKeeper for MockContext {
         &mut self,
         port_channel_id: (PortId, ChannelId),
         seq: Sequence,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.next_sequence_send.insert(port_channel_id, seq);
         Ok(())
     }
@@ -593,7 +652,7 @@ impl ChannelKeeper for MockContext {
         &mut self,
         port_channel_id: (PortId, ChannelId),
         seq: Sequence,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.next_sequence_recv.insert(port_channel_id, seq);
         Ok(())
     }
@@ -602,7 +661,7 @@ impl ChannelKeeper for MockContext {
         &mut self,
         port_channel_id: (PortId, ChannelId),
         seq: Sequence,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.next_sequence_ack.insert(port_channel_id, seq);
         Ok(())
     }
@@ -614,7 +673,7 @@ impl ChannelKeeper for MockContext {
     fn delete_packet_commitment(
         &mut self,
         key: (PortId, ChannelId, Sequence),
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.packet_commitment.remove(&key);
         Ok(())
     }
@@ -623,20 +682,24 @@ impl ChannelKeeper for MockContext {
         &mut self,
         key: (PortId, ChannelId, Sequence),
         receipt: Receipt,
-    ) -> Result<(), ChannelError> {
+    ) -> Result<(), Ics04Error> {
         self.packet_receipt.insert(key, receipt);
         Ok(())
     }
 }
 
 impl ConnectionReader for MockContext {
-    fn connection_end(&self, cid: &ConnectionId) -> Option<ConnectionEnd> {
-        self.connections.get(cid).cloned()
+    fn connection_end(&self, cid: &ConnectionId) -> Result<ConnectionEnd, Ics03Error> {
+        match self.connections.get(cid) {
+            Some(connection_end) => Ok(connection_end.clone()),
+            None => Err(Ics03Error::connection_not_found(cid.clone())),
+        }
     }
 
-    fn client_state(&self, client_id: &ClientId) -> Option<AnyClientState> {
+    fn client_state(&self, client_id: &ClientId) -> Result<AnyClientState, Ics03Error> {
         // Forward method call to the Ics2 Client-specific method.
         ClientReader::client_state(self, client_id)
+            .map_err(|_| Ics03Error::missing_client(client_id.clone()))
     }
 
     fn host_current_height(&self) -> Height {
@@ -656,18 +719,21 @@ impl ConnectionReader for MockContext {
         &self,
         client_id: &ClientId,
         height: Height,
-    ) -> Option<AnyConsensusState> {
+    ) -> Result<AnyConsensusState, Ics03Error> {
         // Forward method call to the Ics2Client-specific method.
         self.consensus_state(client_id, height)
+            .map_err(|_| Ics03Error::missing_client_consensus_state(height, client_id.clone()))
     }
 
-    fn host_consensus_state(&self, height: Height) -> Option<AnyConsensusState> {
-        let block_ref = self.host_block(height);
-        block_ref.cloned().map(Into::into)
+    fn host_consensus_state(&self, height: Height) -> Result<AnyConsensusState, Ics03Error> {
+        match self.host_block(height) {
+            Some(block_ref) => Ok(block_ref.clone().into()),
+            None => Err(Ics03Error::missing_local_consensus_state(height)),
+        }
     }
 
-    fn connection_counter(&self) -> u64 {
-        self.connection_ids_counter
+    fn connection_counter(&self) -> Result<u64, Ics03Error> {
+        Ok(self.connection_ids_counter)
     }
 }
 
@@ -676,7 +742,7 @@ impl ConnectionKeeper for MockContext {
         &mut self,
         connection_id: ConnectionId,
         connection_end: &ConnectionEnd,
-    ) -> Result<(), Ics3Error> {
+    ) -> Result<(), Ics03Error> {
         self.connections
             .insert(connection_id, connection_end.clone());
         Ok(())
@@ -686,7 +752,7 @@ impl ConnectionKeeper for MockContext {
         &mut self,
         connection_id: ConnectionId,
         client_id: &ClientId,
-    ) -> Result<(), Ics3Error> {
+    ) -> Result<(), Ics03Error> {
         self.client_connections
             .insert(client_id.clone(), connection_id);
         Ok(())
@@ -698,32 +764,45 @@ impl ConnectionKeeper for MockContext {
 }
 
 impl ClientReader for MockContext {
-    fn client_type(&self, client_id: &ClientId) -> Option<ClientType> {
+    fn client_type(&self, client_id: &ClientId) -> Result<ClientType, Ics02Error> {
         match self.clients.get(client_id) {
-            Some(client_record) => client_record.client_type.into(),
-            None => None,
+            Some(client_record) => Ok(client_record.client_type),
+            None => Err(Ics02Error::client_not_found(client_id.clone())),
         }
     }
 
-    fn client_state(&self, client_id: &ClientId) -> Option<AnyClientState> {
+    fn client_state(&self, client_id: &ClientId) -> Result<AnyClientState, Ics02Error> {
         match self.clients.get(client_id) {
-            Some(client_record) => client_record.client_state.clone(),
-            None => None,
+            Some(client_record) => client_record
+                .client_state
+                .clone()
+                .ok_or_else(|| Ics02Error::client_not_found(client_id.clone())),
+            None => Err(Ics02Error::client_not_found(client_id.clone())),
         }
     }
 
-    fn consensus_state(&self, client_id: &ClientId, height: Height) -> Option<AnyConsensusState> {
+    fn consensus_state(
+        &self,
+        client_id: &ClientId,
+        height: Height,
+    ) -> Result<AnyConsensusState, Ics02Error> {
         match self.clients.get(client_id) {
             Some(client_record) => match client_record.consensus_states.get(&height) {
-                Some(consensus_state) => Option::from(consensus_state.clone()),
-                None => None,
+                Some(consensus_state) => Ok(consensus_state.clone()),
+                None => Err(Ics02Error::consensus_state_not_found(
+                    client_id.clone(),
+                    height,
+                )),
             },
-            None => None,
+            None => Err(Ics02Error::consensus_state_not_found(
+                client_id.clone(),
+                height,
+            )),
         }
     }
 
-    fn client_counter(&self) -> u64 {
-        self.client_ids_counter
+    fn client_counter(&self) -> Result<u64, Ics02Error> {
+        Ok(self.client_ids_counter)
     }
 }
 
@@ -788,7 +867,7 @@ impl Ics18Context for MockContext {
 
     fn query_client_full_state(&self, client_id: &ClientId) -> Option<AnyClientState> {
         // Forward call to Ics2.
-        ClientReader::client_state(self, client_id)
+        ClientReader::client_state(self, client_id).ok()
     }
 
     fn query_latest_header(&self) -> Option<AnyHeader> {

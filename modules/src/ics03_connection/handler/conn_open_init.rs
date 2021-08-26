@@ -17,9 +17,7 @@ pub(crate) fn process(
     let mut output = HandlerOutput::builder();
 
     // An IBC client running on the local (host) chain should exist.
-    if ctx.client_state(msg.client_id()).is_none() {
-        return Err(Error::missing_client(msg.client_id().clone()));
-    }
+    ctx.client_state(msg.client_id())?;
 
     let new_connection_end = ConnectionEnd::new(
         State::Init,
@@ -30,7 +28,7 @@ pub(crate) fn process(
     );
 
     // Construct the identifier for the new connection.
-    let id_counter = ctx.connection_counter();
+    let id_counter = ctx.connection_counter()?;
     let conn_id = ConnectionId::new(id_counter);
 
     output.log(format!(

@@ -172,5 +172,8 @@ define_error! {
                 format_args!("the client state proof verification failed for client id {0}",
                     e.client_id)
             },
+
+        ImplementationSpecific
+            | _ | { "implementation specific error" },
     }
 }

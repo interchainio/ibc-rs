@@ -15,10 +15,10 @@ use crate::Height;
 /// A context supplying all the necessary read-only dependencies for processing any `ConnectionMsg`.
 pub trait ConnectionReader {
     /// Returns the ConnectionEnd for the given identifier `conn_id`.
-    fn connection_end(&self, conn_id: &ConnectionId) -> Option<ConnectionEnd>;
+    fn connection_end(&self, conn_id: &ConnectionId) -> Result<ConnectionEnd, Error>;
 
     /// Returns the ClientState for the given identifier `client_id`.
-    fn client_state(&self, client_id: &ClientId) -> Option<AnyClientState>;
+    fn client_state(&self, client_id: &ClientId) -> Result<AnyClientState, Error>;
 
     /// Returns the current height of the local chain.
     fn host_current_height(&self) -> Height;
@@ -34,10 +34,10 @@ pub trait ConnectionReader {
         &self,
         client_id: &ClientId,
         height: Height,
-    ) -> Option<AnyConsensusState>;
+    ) -> Result<AnyConsensusState, Error>;
 
     /// Returns the ConsensusState of the host (local) chain at a specific height.
-    fn host_consensus_state(&self, height: Height) -> Option<AnyConsensusState>;
+    fn host_consensus_state(&self, height: Height) -> Result<AnyConsensusState, Error>;
 
     /// Function required by ICS 03. Returns the list of all possible versions that the connection
     /// handshake protocol supports.
@@ -51,14 +51,14 @@ pub trait ConnectionReader {
         &self,
         supported_versions: Vec<Version>,
         counterparty_candidate_versions: Vec<Version>,
-    ) -> Option<Version> {
+    ) -> Result<Version, Error> {
         pick_version(supported_versions, counterparty_candidate_versions)
     }
 
     /// Returns a counter on how many connections have been created thus far.
     /// The value of this counter should increase only via method
     /// `ConnectionKeeper::increase_connection_counter`.
-    fn connection_counter(&self) -> u64;
+    fn connection_counter(&self) -> Result<u64, Error>;
 }
 
 /// A context supplying all the necessary write-only dependencies (i.e., storage writing facility)

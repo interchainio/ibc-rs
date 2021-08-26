@@ -24,11 +24,8 @@ pub struct SendPacketResult {
 pub fn send_packet(ctx: &dyn ChannelReader, packet: Packet) -> HandlerResult<PacketResult, Error> {
     let mut output = HandlerOutput::builder();
 
-    let source_channel_end = ctx
-        .channel_end(&(packet.source_port.clone(), packet.source_channel.clone()))
-        .ok_or_else(|| {
-            Error::channel_not_found(packet.source_port.clone(), packet.source_channel.clone())
-        })?;
+    let source_channel_end =
+        ctx.channel_end(&(packet.source_port.clone(), packet.source_channel.clone()))?;
 
     if source_channel_end.state_matches(&State::Closed) {
         return Err(Error::channel_closed(packet.source_channel));
@@ -48,17 +45,11 @@ pub fn send_packet(ctx: &dyn ChannelReader, packet: Packet) -> HandlerResult<Pac
         ));
     }
 
-    let connection_end = ctx
-        .connection_end(&source_channel_end.connection_hops()[0])
-        .ok_or_else(|| {
-            Error::missing_connection(source_channel_end.connection_hops()[0].clone())
-        })?;
+    let connection_end = ctx.connection_end(&source_channel_end.connection_hops()[0])?;
 
     let client_id = connection_end.client_id().clone();
 
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::missing_client_state(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     // prevent accidental sends with clients that cannot be updated
     if client_state.is_frozen() {
@@ -77,9 +68,7 @@ pub fn send_packet(ctx: &dyn ChannelReader, packet: Packet) -> HandlerResult<Pac
     }
 
     //check if packet timestamp is newer than the timestamp of the latest consensus state of the receiving chain
-    let consensus_state = ctx
-        .client_consensus_state(&client_id, latest_height)
-        .ok_or_else(|| Error::missing_client_consensus_state(client_id.clone(), latest_height))?;
+    let consensus_state = ctx.client_consensus_state(&client_id, latest_height)?;
 
     let latest_timestamp = consensus_state.timestamp();
 
@@ -89,9 +78,8 @@ pub fn send_packet(ctx: &dyn ChannelReader, packet: Packet) -> HandlerResult<Pac
     }
 
     // check sequence number
-    let next_seq_send = ctx
-        .get_next_sequence_send(&(packet.source_port.clone(), packet.source_channel.clone()))
-        .ok_or_else(Error::missing_next_ack_seq)?;
+    let next_seq_send =
+        ctx.get_next_sequence_send(&(packet.source_port.clone(), packet.source_channel.clone()))?;
 
     if packet.sequence != next_seq_send {
         return Err(Error::invalid_packet_sequence(

@@ -12,13 +12,17 @@ use crate::Height;
 
 /// Defines the read-only part of ICS2 (client functions) context.
 pub trait ClientReader {
-    fn client_type(&self, client_id: &ClientId) -> Option<ClientType>;
-    fn client_state(&self, client_id: &ClientId) -> Option<AnyClientState>;
-    fn consensus_state(&self, client_id: &ClientId, height: Height) -> Option<AnyConsensusState>;
+    fn client_type(&self, client_id: &ClientId) -> Result<ClientType, Error>;
+    fn client_state(&self, client_id: &ClientId) -> Result<AnyClientState, Error>;
+    fn consensus_state(
+        &self,
+        client_id: &ClientId,
+        height: Height,
+    ) -> Result<AnyConsensusState, Error>;
 
     /// Returns a natural number, counting how many clients have been created thus far.
     /// The value of this counter should increase only via method `ClientKeeper::increase_client_counter`.
-    fn client_counter(&self) -> u64;
+    fn client_counter(&self) -> Result<u64, Error>;
 }
 
 /// Defines the write-only part of ICS2 (client functions) context.

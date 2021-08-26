@@ -27,11 +27,7 @@ pub(crate) fn process(
     }
 
     // An IBC connection running on the local (host) chain should exist.
-    let connection_end = ctx.connection_end(&msg.channel().connection_hops()[0]);
-
-    let conn = connection_end
-        .ok_or_else(|| Error::missing_connection(msg.channel().connection_hops()[0].clone()))?;
-
+    let conn = ctx.connection_end(&msg.channel().connection_hops()[0])?;
     let get_versions = conn.versions();
     let version = match get_versions.as_slice() {
         [version] => version,
@@ -49,7 +45,7 @@ pub(crate) fn process(
     }
 
     // Channel identifier construction.
-    let id_counter = ctx.channel_counter();
+    let id_counter = ctx.channel_counter()?;
     let chan_id = ChannelId::new(id_counter);
 
     output.log(format!(

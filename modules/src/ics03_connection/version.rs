@@ -70,22 +70,26 @@ pub fn get_compatible_versions() -> Vec<Version> {
 pub fn pick_version(
     supported_versions: Vec<Version>,
     counterparty_versions: Vec<Version>,
-) -> Option<Version> {
+) -> Result<Version, Error> {
     let mut intersection: Vec<Version> = vec![];
     for s in supported_versions.iter() {
         for c in counterparty_versions.iter() {
             if c.identifier != s.identifier {
                 continue;
             }
-            // TODO - perform feature intersection and error if empty
+            for feature in c.features.iter() {
+                if feature.trim().is_empty() {
+                    return Err(Error::empty_features());
+                }
+            }
             intersection.append(&mut vec![s.clone()]);
         }
     }
     intersection.sort_by(|a, b| a.identifier.cmp(&b.identifier));
     if intersection.is_empty() {
-        return None;
+        return Err(Error::no_common_version());
     }
-    Some(intersection[0].clone())
+    Ok(intersection[0].clone())
 }
 
 #[cfg(test)]
@@ -95,6 +99,7 @@ mod tests {
 
     use ibc_proto::ibc::core::connection::v1::Version as RawVersion;
 
+    use crate::ics03_connection::error::Error;
     use crate::ics03_connection::version::{get_compatible_versions, pick_version, Version};
 
     fn good_versions() -> Vec<RawVersion> {
@@ -240,7 +245,7 @@ mod tests {
             name: String,
             supported: Vec<Version>,
             counterparty: Vec<Version>,
-            picked: Option<Version>,
+            picked: Result<Version, Error>,
             want_pass: bool,
         }
         let tests: Vec<Test> = vec![
@@ -248,21 +253,21 @@ mod tests {
                 name: "Compatible versions".to_string(),
                 supported: get_compatible_versions(),
                 counterparty: get_compatible_versions(),
-                picked: Some(Version::default()),
+                picked: Ok(Version::default()),
                 want_pass: true,
             },
             Test {
                 name: "Overlapping versions".to_string(),
                 supported: overlapping().0,
                 counterparty: overlapping().1,
-                picked: Some(overlapping().2),
+                picked: Ok(overlapping().2),
                 want_pass: true,
             },
             Test {
                 name: "Disjoint versions".to_string(),
                 supported: disjoint().0,
                 counterparty: disjoint().1,
-                picked: None,
+                picked: Err(Error::no_common_version()),
                 want_pass: false,
             },
         ];
@@ -272,13 +277,13 @@ mod tests {
 
             assert_eq!(
                 test.want_pass,
-                version.is_some(),
+                version.is_ok(),
                 "Validate versions failed for test {}",
                 test.name,
             );
 
             if test.want_pass {
-                assert_eq!(version, test.picked);
+                assert_eq!(version.unwrap(), test.picked.unwrap());
             }
         }
     }

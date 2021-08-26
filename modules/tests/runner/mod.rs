@@ -225,13 +225,12 @@ impl IbcTestRunner {
                         // if the model has consensus states (encoded simply as
                         // heights in the model), then the highest one should
                         // match the height in the client state
-                        client_state.is_some()
-                            && client_state.unwrap().latest_height() == *max_height
+                        client_state.is_ok() && client_state.unwrap().latest_height() == *max_height
                     }
                     None => {
                         // if the model doesn't have any consensus states
                         // (heights), then the client state should not exist
-                        client_state.is_none()
+                        client_state.is_err()
                     }
                 };
 
@@ -241,7 +240,7 @@ impl IbcTestRunner {
                 //       exist in the model)
                 let consensus_states_match = client.heights.into_iter().all(|height| {
                     ctx.consensus_state(&Self::client_id(client_id), height)
-                        .is_some()
+                        .is_ok()
                 });
 
                 client_state_matches && consensus_states_match
@@ -257,7 +256,7 @@ impl IbcTestRunner {
                             // if the connection has not yet been initialized, then
                             // there's nothing to check
                             true
-                        } else if let Some(connection_end) =
+                        } else if let Ok(connection_end) =
                             ctx.connection_end(&Self::connection_id(connection_id))
                         {
                             // states must match

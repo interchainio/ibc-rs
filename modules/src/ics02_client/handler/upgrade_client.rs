@@ -29,9 +29,7 @@ pub fn process(
     let MsgUpgradeAnyClient { client_id, .. } = msg;
 
     // Read client state from the host chain store.
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::client_not_found(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     if client_state.is_frozen() {
         return Err(Error::client_frozen(client_id));
@@ -46,9 +44,7 @@ pub fn process(
         ));
     }
 
-    let client_type = ctx
-        .client_type(&client_id)
-        .ok_or_else(|| Error::client_not_found(client_id.clone()))?;
+    let client_type = ctx.client_type(&client_id)?;
 
     let client_def = AnyClient::from_client_type(client_type);
 

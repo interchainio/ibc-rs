@@ -29,7 +29,7 @@ pub fn process(
     let mut output = HandlerOutput::builder();
 
     // Construct this client's identifier
-    let id_counter = ctx.client_counter();
+    let id_counter = ctx.client_counter()?;
     let client_id = ClientId::new(msg.client_state().client_type(), id_counter).map_err(|e| {
         Error::client_identifier_constructor(msg.client_state().client_type(), id_counter, e)
     })?;

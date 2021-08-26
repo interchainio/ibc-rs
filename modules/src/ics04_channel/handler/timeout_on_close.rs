@@ -21,11 +21,8 @@ pub fn process(
 
     let packet = &msg.packet;
 
-    let source_channel_end = ctx
-        .channel_end(&(packet.source_port.clone(), packet.source_channel.clone()))
-        .ok_or_else(|| {
-            Error::channel_not_found(packet.source_port.clone(), packet.source_channel.clone())
-        })?;
+    let source_channel_end =
+        ctx.channel_end(&(packet.source_port.clone(), packet.source_channel.clone()))?;
 
     let _channel_cap = ctx.authenticated_capability(&packet.source_port)?;
 
@@ -41,22 +38,16 @@ pub fn process(
         ));
     }
 
-    let connection_end = ctx
-        .connection_end(&source_channel_end.connection_hops()[0])
-        .ok_or_else(|| {
-            Error::missing_connection(source_channel_end.connection_hops()[0].clone())
-        })?;
+    let connection_end = ctx.connection_end(&source_channel_end.connection_hops()[0])?;
 
     let client_id = connection_end.client_id().clone();
 
     //verify the packet was sent, check the store
-    let packet_commitment = ctx
-        .get_packet_commitment(&(
-            packet.source_port.clone(),
-            packet.source_channel.clone(),
-            packet.sequence,
-        ))
-        .ok_or_else(|| Error::packet_commitment_not_found(packet.sequence))?;
+    let packet_commitment = ctx.get_packet_commitment(&(
+        packet.source_port.clone(),
+        packet.source_channel.clone(),
+        packet.sequence,
+    ))?;
 
     let input = format!(
         "{:?},{:?},{:?}",

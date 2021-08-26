@@ -64,9 +64,7 @@ pub fn verify_connection_proof(
     proof: &CommitmentProofBytes,
 ) -> Result<(), Error> {
     // Fetch the client state (IBC client on the local/host chain).
-    let client_state = ctx
-        .client_state(connection_end.client_id())
-        .ok_or_else(|| Error::missing_client(connection_end.client_id().clone()))?;
+    let client_state = ctx.client_state(connection_end.client_id())?;
 
     // The client must not be frozen.
     if client_state.is_frozen() {
@@ -74,15 +72,7 @@ pub fn verify_connection_proof(
     }
 
     // The client must have the consensus state for the height where this proof was created.
-    if ctx
-        .client_consensus_state(connection_end.client_id(), proof_height)
-        .is_none()
-    {
-        return Err(Error::missing_client_consensus_state(
-            proof_height,
-            connection_end.client_id().clone(),
-        ));
-    }
+    ctx.client_consensus_state(connection_end.client_id(), proof_height)?;
 
     let client_def = AnyClient::from_client_type(client_state.client_type());
 
@@ -116,19 +106,13 @@ pub fn verify_client_proof(
     proof: &CommitmentProofBytes,
 ) -> Result<(), Error> {
     // Fetch the local client state (IBC client running on the host chain).
-    let client_state = ctx
-        .client_state(connection_end.client_id())
-        .ok_or_else(|| Error::missing_client(connection_end.client_id().clone()))?;
+    let client_state = ctx.client_state(connection_end.client_id())?;
 
     if client_state.is_frozen() {
         return Err(Error::frozen_client(connection_end.client_id().clone()));
     }
 
-    let consensus_state = ctx
-        .client_consensus_state(connection_end.client_id(), proof_height)
-        .ok_or_else(|| {
-            Error::missing_client_consensus_state(proof_height, connection_end.client_id().clone())
-        })?;
+    let consensus_state = ctx.client_consensus_state(connection_end.client_id(), proof_height)?;
 
     let client_def = AnyClient::from_client_type(client_state.client_type());
 
@@ -154,18 +138,14 @@ pub fn verify_consensus_proof(
     proof: &ConsensusProof,
 ) -> Result<(), Error> {
     // Fetch the client state (IBC client on the local chain).
-    let client_state = ctx
-        .client_state(connection_end.client_id())
-        .ok_or_else(|| Error::missing_client(connection_end.client_id().clone()))?;
+    let client_state = ctx.client_state(connection_end.client_id())?;
 
     if client_state.is_frozen() {
         return Err(Error::frozen_client(connection_end.client_id().clone()));
     }
 
     // Fetch the expected consensus state from the historical (local) header data.
-    let expected_consensus = ctx
-        .host_consensus_state(proof.height())
-        .ok_or_else(|| Error::missing_local_consensus_state(proof.height()))?;
+    let expected_consensus = ctx.host_consensus_state(proof.height())?;
 
     let client = AnyClient::from_client_type(client_state.client_type());
 

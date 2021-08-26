@@ -21,9 +21,7 @@ pub(crate) fn process(
     // Unwrap the old channel end (if any) and validate it against the message.
     let (mut new_channel_end, channel_id) = match msg.previous_channel_id() {
         Some(prev_id) => {
-            let old_channel_end = ctx
-                .channel_end(&(msg.port_id().clone(), prev_id.clone()))
-                .ok_or_else(|| Error::channel_not_found(msg.port_id.clone(), prev_id.clone()))?;
+            let old_channel_end = ctx.channel_end(&(msg.port_id().clone(), prev_id.clone()))?;
 
             // Validate that existing channel end matches with the one we're trying to establish.
             if old_channel_end.state_matches(&State::Init)
@@ -50,7 +48,7 @@ pub(crate) fn process(
             );
 
             // Channel identifier construction.
-            let id_counter = ctx.channel_counter();
+            let id_counter = ctx.channel_counter()?;
             let chan_id = ChannelId::new(id_counter);
 
             output.log(format!(
@@ -70,11 +68,7 @@ pub(crate) fn process(
         ));
     }
 
-    let connection_end_opt = ctx.connection_end(&msg.channel().connection_hops()[0]);
-
-    let conn = connection_end_opt
-        .ok_or_else(|| Error::missing_connection(msg.channel().connection_hops()[0].clone()))?;
-
+    let conn = ctx.connection_end(&msg.channel().connection_hops()[0])?;
     if !conn.state_matches(&ConnectionState::Open) {
         return Err(Error::connection_not_open(
             msg.channel.connection_hops()[0].clone(),

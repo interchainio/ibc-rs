@@ -264,12 +264,10 @@ ICS03_ConnectionOpenAck(
         \* check if the connection exists
         IF ~ICS03_ConnectionExists(connections, connectionId) THEN
             \* if the connection does not exist, then set an error outcome
-            \* TODO: can't we reuse the same error "Ics03ConnectionNotFound"
-            \* from conn open try?
             [
                 connections |-> connections,
                 action |-> action_,
-                outcome |-> "Ics03UninitializedConnection"
+                outcome |-> "Ics03ConnectionNotFound"
             ]
         ELSE
             \* if the connection exists, verify that is either Init or TryOpen;
@@ -359,12 +357,10 @@ ICS03_ConnectionOpenConfirm(
     \* check if the connection exists
     IF ~ICS03_ConnectionExists(connections, connectionId) THEN
         \* if the connection does not exist, then set an error outcome
-        \* TODO: can't we reuse the same error "Ics03ConnectionNotFound"
-        \* from conn open try?
         [
             connections |-> connections,
             action |-> action_,
-            outcome |-> "Ics03UninitializedConnection"
+            outcome |-> "Ics03ConnectionNotFound"
         ]
     ELSE
         \* if the connection exists, verify that is either Init or TryOpen;

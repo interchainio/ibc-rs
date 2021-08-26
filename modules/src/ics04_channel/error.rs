@@ -309,9 +309,27 @@ define_error! {
                     e.sequence)
             },
 
+        PacketReceiptNotFound
+            { sequence: Sequence }
+            | e | {
+                format_args!(
+                    "Receipt for the packet {0} not found",
+                    e.sequence)
+            },
+
+        PacketAcknowledgementNotFound
+            { sequence: Sequence }
+            | e | {
+                format_args!(
+                    "Acknowledgment for the packet {0} not found",
+                    e.sequence)
+            },
+
         MissingNextAckSeq
             | _ | { "Missing sequence number for ack packets" },
 
+        ImplementationSpecific
+            | _ | { "implementation specific error" },
     }
 }
 

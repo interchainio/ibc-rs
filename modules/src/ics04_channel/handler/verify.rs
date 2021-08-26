@@ -19,24 +19,14 @@ pub fn verify_channel_proofs(
     // This is the client which will perform proof verification.
     let client_id = connection_end.client_id().clone();
 
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::missing_client_state(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     // The client must not be frozen.
     if client_state.is_frozen() {
         return Err(Error::frozen_client(client_id));
     }
 
-    if ctx
-        .client_consensus_state(&client_id, proofs.height())
-        .is_none()
-    {
-        return Err(Error::missing_client_consensus_state(
-            client_id,
-            proofs.height(),
-        ));
-    }
+    ctx.client_consensus_state(&client_id, proofs.height())?;
 
     let client_def = AnyClient::from_client_type(client_state.client_type());
 
@@ -62,24 +52,14 @@ pub fn verify_packet_recv_proofs(
     client_id: ClientId,
     proofs: &Proofs,
 ) -> Result<(), Error> {
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::missing_client_state(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     // The client must not be frozen.
     if client_state.is_frozen() {
         return Err(Error::frozen_client(client_id));
     }
 
-    if ctx
-        .client_consensus_state(&client_id, proofs.height())
-        .is_none()
-    {
-        return Err(Error::missing_client_consensus_state(
-            client_id,
-            proofs.height(),
-        ));
-    }
+    ctx.client_consensus_state(&client_id, proofs.height())?;
 
     let client_def = AnyClient::from_client_type(client_state.client_type());
 
@@ -113,9 +93,7 @@ pub fn verify_packet_acknowledgement_proofs(
     client_id: ClientId,
     proofs: &Proofs,
 ) -> Result<(), Error> {
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::missing_client_state(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     // The client must not be frozen.
     if client_state.is_frozen() {
@@ -148,9 +126,7 @@ pub fn verify_next_sequence_recv(
     seq: Sequence,
     proofs: &Proofs,
 ) -> Result<(), Error> {
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::missing_client_state(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     // The client must not be frozen.
     if client_state.is_frozen() {
@@ -180,9 +156,7 @@ pub fn verify_packet_receipt_absence(
     packet: Packet,
     proofs: &Proofs,
 ) -> Result<(), Error> {
-    let client_state = ctx
-        .client_state(&client_id)
-        .ok_or_else(|| Error::missing_client_state(client_id.clone()))?;
+    let client_state = ctx.client_state(&client_id)?;
 
     // The client must not be frozen.
     if client_state.is_frozen() {

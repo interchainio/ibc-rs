@@ -18,6 +18,7 @@ max_tx_size = 1048576
 clock_drift = '5s'
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
+address_type = { derivation = 'cosmos' }
 
 [[chains]]
 id = 'chain_B'
@@ -32,4 +33,4 @@ gas_price = { price = 0.001, denom = 'stake' }
 clock_drift = '5s'
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
-
+address_type = { derivation = 'ethermint', proto_type = { pk_type = '/injective.crypto.v1beta1.ethsecp256k1.PubKey' } }

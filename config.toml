@@ -131,6 +131,20 @@ trusting_period = '14days'
 # Warning: This is an advanced feature! Modify with caution.
 trust_threshold = { numerator = '1', denominator = '3' }
 
+# Specify the address type which determines:
+# 1) address derivation;
+# 2) how to retrieve and decode accounts and pubkeys;
+# 3) the message signing method.
+# The current configuration options are for Cosmos SDK and Ethermint.
+#
+# Example configuration for Ethermint:
+#
+# address_type = { derivation = 'ethermint', proto_type = { pk_type = '/injective.crypto.v1beta1.ethsecp256k1.PubKey' } }
+#
+# Default: { derivation = 'cosmos' }, i.e. address derivation as in Cosmos SDK
+# Warning: This is an advanced feature! Modify with caution.
+address_type = { derivation = 'cosmos' }
+
 # This section specifies the filters for policy based relaying.
 # Default: no policy/ filters
 # The section is ignored if the global 'filter' option is set to 'false'.
@@ -168,3 +182,4 @@ max_tx_size = 2097152
 clock_drift = '5s'
 trusting_period = '14days'
 trust_threshold = { numerator = '1', denominator = '3' }
+address_type = { derivation = 'cosmos' }

@@ -50,7 +50,7 @@ use ibc::ics24_host::{ClientUpgradePath, Path, IBC_QUERY_PATH, SDK_UPGRADE_QUERY
 use ibc::query::{QueryTxHash, QueryTxRequest};
 use ibc::signer::Signer;
 use ibc::Height as ICSHeight;
-use ibc_proto::cosmos::auth::v1beta1::{BaseAccount, QueryAccountRequest};
+use ibc_proto::cosmos::auth::v1beta1::{BaseAccount, EthAccount, QueryAccountRequest};
 use ibc_proto::cosmos::base::tendermint::v1beta1::service_client::ServiceClient;
 use ibc_proto::cosmos::base::tendermint::v1beta1::GetNodeInfoRequest;
 use ibc_proto::cosmos::base::v1beta1::Coin;
@@ -71,7 +71,7 @@ use ibc_proto::ibc::core::connection::v1::{
     QueryClientConnectionsRequest, QueryConnectionsRequest,
 };
 
-use crate::config::{ChainConfig, GasPrice};
+use crate::config::{AddressType, ChainConfig, GasPrice};
 use crate::error::Error;
 use crate::event::monitor::{EventMonitor, EventReceiver};
 use crate::keyring::{KeyEntry, KeyRing, Store};
@@ -523,14 +523,12 @@ impl CosmosSdkChain {
     fn account(&mut self) -> Result<&mut BaseAccount, Error> {
         if self.account == None {
             let account = self.block_on(query_account(self, self.key()?.account))?;
-
             debug!(
                 sequence = %account.sequence,
                 number = %account.account_number,
                 "[{}] send_tx: retrieved account",
                 self.id()
             );
-
             self.account = Some(account);
         }
 
@@ -555,9 +553,13 @@ impl CosmosSdkChain {
 
     fn signer(&self, sequence: u64) -> Result<SignerInfo, Error> {
         let (_key, pk_buf) = self.key_and_bytes()?;
+        let pk_type = match &self.config.address_type {
+            AddressType::Cosmos => "/cosmos.crypto.secp256k1.PubKey".to_string(),
+            AddressType::Ethermint { pk_type } => pk_type.clone(),
+        };
         // Create a MsgSend proto Any message
         let pk_any = Any {
-            type_url: "/cosmos.crypto.secp256k1.PubKey".to_string(),
+            type_url: pk_type,
             value: pk_buf,
         };
 
@@ -610,7 +612,11 @@ impl CosmosSdkChain {
         // Sign doc
         let signed = self
             .keybase
-            .sign_msg(&self.config.key_name, signdoc_buf)
+            .sign_msg(
+                &self.config.key_name,
+                signdoc_buf,
+                &self.config.address_type,
+            )
             .map_err(Error::key_base)?;
 
         Ok(signed)
@@ -1948,19 +1954,22 @@ async fn query_account(chain: &CosmosSdkChain, address: String) -> Result<BaseAc
     let request = tonic::Request::new(QueryAccountRequest { address });
 
     let response = client.account(request).await;
-
-    let base_account = BaseAccount::decode(
-        response
-            .map_err(Error::grpc_status)?
-            .into_inner()
-            .account
-            .unwrap()
-            .value
-            .as_slice(),
-    )
-    .map_err(|e| Error::protobuf_decode("BaseAccount".to_string(), e))?;
-
-    Ok(base_account)
+    let resp_account = response
+        .map_err(Error::grpc_status)?
+        .into_inner()
+        .account
+        .unwrap();
+    if resp_account.type_url == "/cosmos.auth.v1beta1.BaseAccount" {
+        Ok(BaseAccount::decode(resp_account.value.as_slice())
+            .map_err(|e| Error::protobuf_decode("BaseAccount".to_string(), e))?)
+    } else if resp_account.type_url.ends_with(".EthAccount") {
+        Ok(EthAccount::decode(resp_account.value.as_slice())
+            .map_err(|e| Error::protobuf_decode("EthAccount".to_string(), e))?
+            .base_account
+            .ok_or_else(Error::empty_base_account)?)
+    } else {
+        Err(Error::unknown_account_type(resp_account.type_url))
+    }
 }
 
 fn encode_to_bech32(address: &str, account_prefix: &str) -> Result<String, Error> {

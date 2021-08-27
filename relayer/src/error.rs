@@ -422,6 +422,19 @@ define_error! {
                 format!("Hermes health check failed while verifying the application compatibility for chain {0}:{1}; caused by: {2}",
                     e.chain_id, e.address, e.cause)
             },
+
+        UnknownAccountType
+            {
+                type_url: String
+            }
+            |e| {
+                format!("Failed to deserialize account of an unknown protobuf type: {0}",
+                    e.type_url)
+            },
+
+        EmptyBaseAccount
+            |_| { "Empty BaseAccount within EthAccount" },
+
     }
 }
 

@@ -7,6 +7,10 @@ define_error! {
             [ TraceError<signature::Error> ]
             |_| { "invalid key: could not build signing key from private key bytes" },
 
+        InvalidKeyRaw
+            [ TraceError<bitcoin::secp256k1::Error> ]
+            |_| { "invalid key: could not build signing key from private key bytes" },
+
         KeyNotFound
             |_| { "key not found" },
 

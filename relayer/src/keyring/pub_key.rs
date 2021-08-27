@@ -63,7 +63,11 @@ impl FromStr for EncodedPubKey {
                     proto.tpe
                 );
 
-                if proto.tpe != "/cosmos.crypto.secp256k1.PubKey" {
+                // Ethermint pubkey types:
+                // "/ethermint.crypto.v1alpha1.ethsecp256k1.PubKey", "/injective.crypto.v1beta1.ethsecp256k1.PubKey"
+                if proto.tpe != "/cosmos.crypto.secp256k1.PubKey"
+                    && !proto.tpe.ends_with(".ethsecp256k1.PubKey")
+                {
                     Err(Error::unsupported_public_key(proto.tpe))
                 } else {
                     Ok(EncodedPubKey::Proto(proto))

@@ -1,13 +1,9 @@
-use std::collections::HashMap;
-use std::ffi::OsStr;
-use std::fs::{self, File};
-use std::path::{Path, PathBuf};
-
+use crate::config::AddressType;
 use bech32::{ToBase32, Variant};
 use bip39::{Language, Mnemonic, Seed};
 use bitcoin::{
     network::constants::Network,
-    secp256k1::Secp256k1,
+    secp256k1::{Message, Secp256k1, SecretKey},
     util::bip32::{DerivationPath, ExtendedPrivKey, ExtendedPubKey},
 };
 use hdpath::StandardHDPath;
@@ -16,6 +12,11 @@ use k256::ecdsa::{signature::Signer, Signature, SigningKey};
 use ripemd160::Ripemd160;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
+use std::collections::HashMap;
+use std::ffi::OsStr;
+use std::fs::{self, File};
+use std::path::{Path, PathBuf};
+use tiny_keccak::{Hasher, Keccak};
 
 use errors::Error;
 pub use pub_key::EncodedPubKey;
@@ -320,6 +321,7 @@ impl KeyRing {
         &self,
         mnemonic_words: &str,
         hd_path: &HDPath,
+        at: &AddressType,
     ) -> Result<KeyEntry, Error> {
         // Get the private key from the mnemonic
         let private_key = private_key_from_mnemonic(mnemonic_words, hd_path)?;
@@ -328,7 +330,7 @@ impl KeyRing {
         let public_key = ExtendedPubKey::from_private(&Secp256k1::new(), &private_key);
 
         // Get address from the public Key
-        let address = get_address(public_key);
+        let address = get_address(public_key, at);
 
         // Compute Bech32 account
         let account = bech32::encode(self.account_prefix(), address.to_base32(), Variant::Bech32)
@@ -343,15 +345,33 @@ impl KeyRing {
     }
 
     /// Sign a message
-    pub fn sign_msg(&self, key_name: &str, msg: Vec<u8>) -> Result<Vec<u8>, Error> {
+    pub fn sign_msg(
+        &self,
+        key_name: &str,
+        msg: Vec<u8>,
+        address_type: &AddressType,
+    ) -> Result<Vec<u8>, Error> {
         let key = self.get_key(key_name)?;
 
         let private_key_bytes = key.private_key.private_key.to_bytes();
-        let signing_key =
-            SigningKey::from_bytes(private_key_bytes.as_slice()).map_err(Error::invalid_key)?;
-
-        let signature: Signature = signing_key.sign(&msg);
-        Ok(signature.as_ref().to_vec())
+        match address_type {
+            AddressType::Cosmos => {
+                let signing_key = SigningKey::from_bytes(private_key_bytes.as_slice())
+                    .map_err(Error::invalid_key)?;
+                let signature: Signature = signing_key.sign(&msg);
+                Ok(signature.as_ref().to_vec())
+            }
+            AddressType::Ethermint { .. } => {
+                let hash = keccak256_hash(msg.as_slice());
+                let s = Secp256k1::signing_only();
+                // SAFETY: hash is 32 bytes, as expected in `Message::from_slice` -- see `keccak256_hash`, hence `unwrap`
+                let sign_msg = Message::from_slice(hash.as_slice()).unwrap();
+                let key = SecretKey::from_slice(private_key_bytes.as_slice())
+                    .map_err(Error::invalid_key_raw)?;
+                let (_, sig_bytes) = s.sign_recoverable(&sign_msg, &key).serialize_compact();
+                Ok(sig_bytes.to_vec())
+            }
+        }
     }
 
     pub fn account_prefix(&self) -> &str {
@@ -380,19 +400,33 @@ fn private_key_from_mnemonic(
 }
 
 /// Return an address from a Public Key
-fn get_address(pk: ExtendedPubKey) -> Vec<u8> {
-    let mut hasher = Sha256::new();
-    hasher.update(pk.public_key.to_bytes().as_slice());
+fn get_address(pk: ExtendedPubKey, at: &AddressType) -> Vec<u8> {
+    match at {
+        AddressType::Ethermint { ref pk_type } if pk_type.ends_with(".ethsecp256k1.PubKey") => {
+            let public_key = pk.public_key.key.serialize_uncompressed();
+            // 0x04 is [SECP256K1_TAG_PUBKEY_UNCOMPRESSED](https://github.com/bitcoin-core/secp256k1/blob/d7ec49a6893751f068275cc8ddf4993ef7f31756/include/secp256k1.h#L196)
+            debug_assert_eq!(public_key[0], 0x04);
 
-    // Read hash digest over the public key bytes & consume hasher
-    let pk_hash = hasher.finalize();
+            let output = keccak256_hash(&public_key[1..]);
+            // right-most 20-bytes from the 32-byte keccak hash
+            // (see https://kobl.one/blog/create-full-ethereum-keypair-and-address/)
+            output[12..].to_vec()
+        }
+        AddressType::Cosmos | AddressType::Ethermint { .. } => {
+            let mut hasher = Sha256::new();
+            hasher.update(pk.public_key.to_bytes().as_slice());
 
-    // Plug the hash result into the next crypto hash function.
-    let mut rip_hasher = Ripemd160::new();
-    rip_hasher.update(pk_hash);
-    let rip_result = rip_hasher.finalize();
+            // Read hash digest over the public key bytes & consume hasher
+            let pk_hash = hasher.finalize();
 
-    rip_result.to_vec()
+            // Plug the hash result into the next crypto hash function.
+            let mut rip_hasher = Ripemd160::new();
+            rip_hasher.update(pk_hash);
+            let rip_result = rip_hasher.finalize();
+
+            rip_result.to_vec()
+        }
+    }
 }
 
 fn decode_bech32(input: &str) -> Result<Vec<u8>, Error> {
@@ -414,4 +448,12 @@ fn disk_store_path(folder_name: &str) -> Result<PathBuf, Error> {
         .join(KEYSTORE_DISK_BACKEND);
 
     Ok(folder)
+}
+
+fn keccak256_hash(bytes: &[u8]) -> Vec<u8> {
+    let mut hasher = Keccak::v256();
+    hasher.update(bytes);
+    let mut resp = vec![0u8; 32];
+    hasher.finalize(&mut resp);
+    resp
 }

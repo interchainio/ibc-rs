@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use ibc_relayer_types::applications::ics29_fee::events::IncentivizedPacket;
 use ibc_relayer_types::core::{
-    ics02_client::{client_state::ClientState, events::UpdateClient},
+    ics02_client::events::UpdateClient,
     ics03_connection::events::Attributes as ConnectionAttributes,
     ics04_channel::events::{
         Attributes, CloseInit, SendPacket, TimeoutPacket, WriteAcknowledgement,

@@ -11,7 +11,6 @@ use ibc_relayer::chain::requests::{
 use ibc_relayer::channel::Channel;
 use ibc_relayer::connection::Connection;
 use ibc_relayer::foreign_client::ForeignClient;
-use ibc_relayer_types::core::ics02_client::client_state::ClientState;
 use ibc_relayer_types::core::ics03_connection::connection::IdentifiedConnectionEnd;
 use ibc_relayer_types::core::ics04_channel::channel::Ordering;
 use ibc_relayer_types::core::ics04_channel::version::Version;

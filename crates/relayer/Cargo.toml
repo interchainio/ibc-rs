@@ -20,7 +20,7 @@ default   = ["flex-error/std", "flex-error/eyre_tracer"]
 telemetry = ["ibc-telemetry"]
 
 [dependencies]
-ibc-proto         = { version = "0.34.0", features = ["serde"] }
+ibc-proto         = { version = "0.35.0", features = ["serde"] }
 ibc-telemetry     = { version = "0.25.0", path = "../telemetry", optional = true }
 ibc-relayer-types = { version = "0.25.0", path = "../relayer-types", features = ["mocks"] }
 

@@ -11,7 +11,6 @@ use ibc_relayer::chain::requests::{
     QueryConnectionRequest, QueryHeight,
 };
 use ibc_relayer::registry::Registry;
-use ibc_relayer_types::core::ics02_client::client_state::ClientState;
 use ibc_relayer_types::core::ics04_channel::channel::{ChannelEnd, State};
 use ibc_relayer_types::core::ics24_host::identifier::{
     ChainId, ChannelId, ConnectionId, PortChannelId, PortId,

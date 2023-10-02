@@ -8,12 +8,15 @@ use super::error::Error;
 pub enum ClientType {
     Tendermint = 1,
 
+    Localhost = 9,
+
     #[cfg(any(test, feature = "mocks"))]
     Mock = 9999,
 }
 
 impl ClientType {
     const TENDERMINT_STR: &'static str = "07-tendermint";
+    const LOCALHOST_STR: &'static str = "09-localhost";
 
     #[cfg_attr(not(test), allow(dead_code))]
     const MOCK_STR: &'static str = "9999-mock";
@@ -22,6 +25,7 @@ impl ClientType {
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Tendermint => Self::TENDERMINT_STR,
+            Self::Localhost => Self::LOCALHOST_STR,
 
             #[cfg(any(test, feature = "mocks"))]
             Self::Mock => Self::MOCK_STR,
@@ -31,7 +35,7 @@ impl ClientType {
 
 impl Display for ClientType {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), FmtError> {
-        write!(f, "ClientType({})", self.as_str())
+        write!(f, "{}", self.as_str())
     }
 }
 
@@ -41,6 +45,7 @@ impl core::str::FromStr for ClientType {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             Self::TENDERMINT_STR => Ok(Self::Tendermint),
+            Self::LOCALHOST_STR => Ok(Self::Localhost),
 
             #[cfg(any(test, feature = "mocks"))]
             Self::MOCK_STR => Ok(Self::Mock),
@@ -64,6 +69,16 @@ mod tests {
 
         match client_type {
             Ok(ClientType::Tendermint) => (),
+            _ => panic!("parse failed"),
+        }
+    }
+
+    #[test]
+    fn parse_localhost_client_type() {
+        let client_type = ClientType::from_str("09-localhost");
+
+        match client_type {
+            Ok(ClientType::Localhost) => (),
             _ => panic!("parse failed"),
         }
     }
@@ -104,6 +119,14 @@ mod tests {
     #[test]
     fn parse_tendermint_as_string_result() {
         let client_type = ClientType::Tendermint;
+        let type_string = client_type.as_str();
+        let client_type_from_str = ClientType::from_str(type_string).unwrap();
+        assert_eq!(client_type_from_str, client_type);
+    }
+
+    #[test]
+    fn parse_localhost_as_string_result() {
+        let client_type = ClientType::Localhost;
         let type_string = client_type.as_str();
         let client_type_from_str = ClientType::from_str(type_string).unwrap();
         assert_eq!(client_type_from_str, client_type);

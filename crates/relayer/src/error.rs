@@ -35,7 +35,6 @@ use ibc_relayer_types::{
         ics24_host::identifier::{ChainId, ChannelId, ConnectionId},
     },
     proofs::ProofError,
-    relayer::ics18_relayer::error as relayer_error,
 };
 
 use crate::chain::cosmos::version;
@@ -280,10 +279,6 @@ define_error! {
         Ics07
             [ tendermint_error::Error ]
             |_| { "ICS 07 error" },
-
-        Ics18
-            [ relayer_error::Error ]
-            |_| { "ICS 18 error" },
 
         Ics23
             [ commitment_error::Error ]

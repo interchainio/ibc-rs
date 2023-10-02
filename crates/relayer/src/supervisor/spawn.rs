@@ -1,7 +1,7 @@
 use tracing::{error, info};
 
 use ibc_relayer_types::core::{
-    ics02_client::client_state::ClientState, ics03_connection::connection::IdentifiedConnectionEnd,
+    ics03_connection::connection::IdentifiedConnectionEnd,
     ics04_channel::channel::State as ChannelState,
 };
 

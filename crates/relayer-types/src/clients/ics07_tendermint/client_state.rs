@@ -14,7 +14,7 @@ use tendermint_light_client_verifier::options::Options;
 use crate::clients::ics07_tendermint::error::Error;
 use crate::clients::ics07_tendermint::header::Header as TmHeader;
 use crate::core::ics02_client::client_state::{
-    ClientState as Ics2ClientState, UpgradeOptions as CoreUpgradeOptions,
+    ClientState as Ics2ClientState, UpgradableClientState,
 };
 use crate::core::ics02_client::client_type::ClientType;
 use crate::core::ics02_client::error::Error as Ics02Error;
@@ -199,7 +199,29 @@ pub struct UpgradeOptions {
     pub unbonding_period: Duration,
 }
 
-impl CoreUpgradeOptions for UpgradeOptions {}
+impl UpgradableClientState for ClientState {
+    type UpgradeOptions = UpgradeOptions;
+
+    fn upgrade(
+        &mut self,
+        upgrade_height: Height,
+        upgrade_options: UpgradeOptions,
+        chain_id: ChainId,
+    ) {
+        // Reset custom fields to zero values
+        self.trusting_period = ZERO_DURATION;
+        self.trust_threshold = TrustThreshold::CLIENT_STATE_RESET;
+        self.allow_update.after_expiry = false;
+        self.allow_update.after_misbehaviour = false;
+        self.frozen_height = None;
+        self.max_clock_drift = ZERO_DURATION;
+
+        // Upgrade the client state
+        self.latest_height = upgrade_height;
+        self.unbonding_period = upgrade_options.unbonding_period;
+        self.chain_id = chain_id;
+    }
+}
 
 impl Ics2ClientState for ClientState {
     fn chain_id(&self) -> ChainId {
@@ -216,31 +238,6 @@ impl Ics2ClientState for ClientState {
 
     fn frozen_height(&self) -> Option<Height> {
         self.frozen_height
-    }
-
-    fn upgrade(
-        &mut self,
-        upgrade_height: Height,
-        upgrade_options: &dyn CoreUpgradeOptions,
-        chain_id: ChainId,
-    ) {
-        let upgrade_options = upgrade_options
-            .as_any()
-            .downcast_ref::<UpgradeOptions>()
-            .expect("UpgradeOptions not of type Tendermint");
-
-        // Reset custom fields to zero values
-        self.trusting_period = ZERO_DURATION;
-        self.trust_threshold = TrustThreshold::CLIENT_STATE_RESET;
-        self.allow_update.after_expiry = false;
-        self.allow_update.after_misbehaviour = false;
-        self.frozen_height = None;
-        self.max_clock_drift = ZERO_DURATION;
-
-        // Upgrade the client state
-        self.latest_height = upgrade_height;
-        self.unbonding_period = upgrade_options.unbonding_period;
-        self.chain_id = chain_id;
     }
 
     fn expired(&self, elapsed: Duration) -> bool {

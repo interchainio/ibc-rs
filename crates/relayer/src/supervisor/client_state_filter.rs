@@ -4,7 +4,6 @@ use flex_error::define_error;
 use ibc_relayer_types::core::ics02_client::trust_threshold::TrustThreshold;
 use tracing::{debug, trace};
 
-use ibc_relayer_types::core::ics02_client::client_state::ClientState;
 use ibc_relayer_types::core::ics03_connection::connection::ConnectionEnd;
 use ibc_relayer_types::core::ics04_channel::error::Error as ChannelError;
 use ibc_relayer_types::core::ics24_host::identifier::{

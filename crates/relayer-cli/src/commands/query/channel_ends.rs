@@ -9,7 +9,6 @@ use ibc_relayer::chain::requests::{
 };
 use ibc_relayer::client_state::AnyClientState;
 use ibc_relayer::registry::Registry;
-use ibc_relayer_types::core::ics02_client::client_state::ClientState;
 use ibc_relayer_types::core::ics03_connection::connection::ConnectionEnd;
 use ibc_relayer_types::core::ics04_channel::channel::{ChannelEnd, State};
 use ibc_relayer_types::core::ics24_host::identifier::ChainId;

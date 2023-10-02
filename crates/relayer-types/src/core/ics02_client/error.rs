@@ -63,6 +63,10 @@ define_error! {
             { client_state_type: String }
             | e | { format_args!("unknown client state type: {0}", e.client_state_type) },
 
+        UnexpectedClientStateType
+            { expected: String, got: String }
+            | e | { format_args!("unexpected client state type: expected `{0}`, got {1}", e.expected, e.got) },
+
         EmptyClientStateResponse
             | _ | { "the client state was not found" },
 

@@ -4,7 +4,6 @@ use ibc_relayer::chain::handle::ChainHandle;
 use serde::Serialize;
 
 use ibc_relayer::chain::requests::{PageRequest, QueryClientStatesRequest};
-use ibc_relayer_types::core::ics02_client::client_state::ClientState;
 use ibc_relayer_types::core::ics24_host::identifier::{ChainId, ClientId};
 
 use crate::cli_utils::spawn_chain_runtime;

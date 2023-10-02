@@ -12,7 +12,7 @@ description  = """
 """
 
 [dependencies]
-ibc-proto         = { version = "0.34.0", features = ["serde"] }
+ibc-proto         = { version = "0.35.0", features = ["serde"] }
 ibc-relayer-types = { version = "0.25.0", path = "../relayer-types" }
 tendermint-rpc = { version = "0.33.0", features = [
     "http-client",

@@ -103,9 +103,6 @@ impl BinaryChannelTest for ChannelUpgradeFlushing {
 
         let denom_a = chains.node_a.denom();
 
-        let port_a = channels.port_a.as_ref();
-        let channel_id_a = channels.channel_id_a.as_ref();
-
         let wallets_a = chains.node_a.wallets();
         let wallets_b = chains.node_b.wallets();
 
@@ -115,21 +112,19 @@ impl BinaryChannelTest for ChannelUpgradeFlushing {
         let send_amount = random_u128_range(1000, 2000);
 
         chain_driver_a.ibc_transfer_token(
-            &port_a,
-            &channel_id_a,
+            &channels,
             &user_a,
             &user_b.address(),
-            &denom_a.with_amount(send_amount).as_ref(),
+            &vec![denom_a.with_amount(send_amount).as_ref()],
         )?;
 
         sleep(Duration::from_secs(3));
 
         chain_driver_a.ibc_transfer_token(
-            &port_a,
-            &channel_id_a,
+            &channels,
             &user_a,
             &user_b.address(),
-            &denom_a.with_amount(send_amount).as_ref(),
+            &vec![denom_a.with_amount(send_amount).as_ref()],
         )?;
 
         let old_ordering = channel_end_a.ordering;
@@ -137,7 +132,7 @@ impl BinaryChannelTest for ChannelUpgradeFlushing {
         let old_connection_hops_b = channel_end_b.connection_hops;
 
         let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let upgraded_attrs = ChannelUpgradableAttributes::new(
             new_version.clone(),
@@ -257,8 +252,7 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFlushPackets {
         let old_connection_hops_a = channel_end_a.connection_hops;
         let old_connection_hops_b = channel_end_b.connection_hops;
 
-        let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let old_attrs = ChannelUpgradableAttributes::new(
             old_version.clone(),
@@ -281,8 +275,8 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFlushPackets {
         info!("Will initialise upgrade handshake with governance proposal...");
 
         chains.node_a.chain_driver().initialise_channel_upgrade(
-            channel.src_port_id().as_str(),
-            channel.src_channel_id().unwrap().as_str(),
+            channels.channel.src_port_id().as_str(),
+            channels.channel.src_channel_id().unwrap().as_str(),
             old_ordering.as_str(),
             old_connection_hops_a.first().unwrap().as_str(),
             &serde_json::to_string(&new_version.0).unwrap(),
@@ -317,11 +311,10 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFlushPackets {
         );
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channels.port_a.as_ref(),
-            &channels.channel_id_a.as_ref(),
+            &channels,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(a_to_b_amount).as_ref(),
+            &vec![denom_a.with_amount(a_to_b_amount).as_ref()],
         )?;
 
         // send a IBC transfer message from chain b to chain a
@@ -339,16 +332,15 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFlushPackets {
         );
 
         chains.node_b.chain_driver().ibc_transfer_token(
-            &channels.port_b.as_ref(),
-            &channels.channel_id_b.as_ref(),
+            &channels.clone().flip(),
             &wallet_b.as_ref(),
             &wallet_a.address(),
-            &denom_b.with_amount(b_to_a_amount).as_ref(),
+            &vec![denom_b.with_amount(b_to_a_amount).as_ref()],
         )?;
 
         info!("Will run ChanUpgradeTry step...");
 
-        channel.build_chan_upgrade_try_and_send()?;
+        channels.channel.build_chan_upgrade_try_and_send()?;
 
         info!("Check that the step ChanUpgradeTry was correctly executed...");
 
@@ -362,7 +354,10 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFlushPackets {
 
         info!("Will run ChanUpgradeAck step...");
 
-        channel.flipped().build_chan_upgrade_ack_and_send()?;
+        channels
+            .channel
+            .flipped()
+            .build_chan_upgrade_ack_and_send()?;
 
         info!("Check that the step ChanUpgradeAck was correctly executed...");
 

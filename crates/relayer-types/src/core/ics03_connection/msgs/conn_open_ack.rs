@@ -47,6 +47,10 @@ impl Msg for MsgConnectionOpenAck {
 
 impl Protobuf<RawMsgConnectionOpenAck> for MsgConnectionOpenAck {}
 
+// TODO: ibc-go v9 deprecated multiple fields in Connection Open Ack.
+// Keep the fields to be compatible with previous versions until all
+// previous versions get to end-of-life.
+#[allow(deprecated)]
 impl TryFrom<RawMsgConnectionOpenAck> for MsgConnectionOpenAck {
     type Error = Error;
 

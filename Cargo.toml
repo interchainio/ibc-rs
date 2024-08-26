@@ -120,6 +120,7 @@ uuid                     = "1.10.0"
 overflow-checks = true
 
 [patch.crates-io]
+ibc-proto                       = { git = "https://github.com/cosmos/ibc-proto-rs.git", branch = "luca_joss/update-ibc-go-commit" }
 # tendermint                       = { git = "https://github.com/informalsystems/tendermint-rs.git", branch = "main" }
 # tendermint-rpc                   = { git = "https://github.com/informalsystems/tendermint-rs.git", branch = "main" }
 # tendermint-proto                 = { git = "https://github.com/informalsystems/tendermint-rs.git", branch = "main" }

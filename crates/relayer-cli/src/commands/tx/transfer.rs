@@ -161,11 +161,11 @@ impl TxIcs20MsgTransferCmd {
             return Err(eyre!("number of messages should be greater than zero"));
         }
 
+        let tokens = vec![(self.amount, denom)];
         let opts = TransferOptions {
             src_port_id: self.src_port_id.clone(),
             src_channel_id: self.src_channel_id.clone(),
-            amount: self.amount,
-            denom,
+            tokens,
             receiver: self.receiver.clone(),
             timeout_height_offset: self.timeout_height_offset,
             timeout_duration: Duration::from_secs(self.timeout_seconds),

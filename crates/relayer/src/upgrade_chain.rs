@@ -12,7 +12,7 @@ use ibc_proto::cosmos::gov::v1::MsgSubmitProposal;
 use ibc_proto::cosmos::gov::v1beta1::MsgSubmitProposal as LegacyMsgSubmitProposal;
 use ibc_proto::cosmos::upgrade::v1beta1::Plan;
 use ibc_proto::google::protobuf::Any;
-use ibc_proto::ibc::core::client::v1::{MsgIbcSoftwareUpgrade, UpgradeProposal};
+use ibc_proto::ibc::core::client::v1::MsgIbcSoftwareUpgrade;
 use ibc_relayer_types::clients::ics07_tendermint::client_state::UpgradeOptions;
 use ibc_relayer_types::core::ics02_client::client_state::UpgradableClientState;
 use ibc_relayer_types::core::ics24_host::identifier::{ChainId, ClientId};
@@ -24,6 +24,27 @@ use crate::chain::requests::{IncludeProof, QueryClientStateRequest, QueryHeight}
 use crate::chain::tracking::TrackedMsgs;
 use crate::client_state::AnyClientState;
 use crate::error::Error;
+
+/// Extracted `UpgradeProposal` since ibc-go removed it from
+/// the proto definitions, https://github.com/cosmos/ibc-go/pull/6782
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct UpgradeProposal {
+    #[prost(string, tag = "1")]
+    pub title: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub description: ::prost::alloc::string::String,
+    #[prost(message, optional, tag = "3")]
+    pub plan: ::core::option::Option<ibc_proto::cosmos::upgrade::v1beta1::Plan>,
+    /// An UpgradedClientState must be provided to perform an IBC breaking upgrade.
+    /// This will make the chain commit to the correct upgraded (self) client state
+    /// before the upgrade occurs, so that connecting chains can verify that the
+    /// new upgraded client is valid by verifying a proof on the previous version
+    /// of the chain. This will allow IBC connections to persist smoothly across
+    /// planned chain upgrades
+    #[prost(message, optional, tag = "4")]
+    pub upgraded_client_state: ::core::option::Option<ibc_proto::google::protobuf::Any>,
+}
 
 define_error! {
     UpgradeChainError {

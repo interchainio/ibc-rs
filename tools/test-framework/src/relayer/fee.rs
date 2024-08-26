@@ -6,6 +6,7 @@ use ibc_relayer::chain::cosmos::query::fee::{
 };
 use ibc_relayer::chain::cosmos::tx::simple_send_tx;
 use ibc_relayer::chain::cosmos::types::config::TxConfig;
+use ibc_relayer::channel::version::Version;
 use ibc_relayer::event::IbcEventWithHeight;
 use ibc_relayer_types::applications::ics29_fee::msgs::pay_packet::build_pay_packet_message;
 use ibc_relayer_types::applications::ics29_fee::msgs::pay_packet_async::build_pay_packet_fee_async_message;
@@ -28,9 +29,10 @@ pub async fn ibc_token_transfer_with_fee<SrcChain, DstChain>(
     tx_config: &MonoTagged<SrcChain, &TxConfig>,
     port_id: &TaggedPortIdRef<'_, SrcChain, DstChain>,
     channel_id: &TaggedChannelIdRef<'_, SrcChain, DstChain>,
+    channel_version: &Version,
     sender: &MonoTagged<SrcChain, &Wallet>,
     recipient: &MonoTagged<DstChain, &WalletAddress>,
-    send_amount: &TaggedTokenRef<'_, SrcChain>,
+    send_amount: &Vec<TaggedTokenRef<'_, SrcChain>>,
     receive_fee: &TaggedTokenRef<'_, SrcChain>,
     ack_fee: &TaggedTokenRef<'_, SrcChain>,
     timeout_fee: &TaggedTokenRef<'_, SrcChain>,
@@ -39,6 +41,7 @@ pub async fn ibc_token_transfer_with_fee<SrcChain, DstChain>(
     let transfer_message = build_transfer_message(
         port_id,
         channel_id,
+        channel_version,
         sender,
         recipient,
         send_amount,

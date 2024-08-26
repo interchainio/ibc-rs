@@ -12,7 +12,7 @@ pub use ibc_relayer_types::core::ics04_channel::version::Version;
 pub fn default_by_port(port_id: &PortId) -> Option<Version> {
     if port_id.as_str() == transfer::PORT_ID_STR {
         // https://github.com/cosmos/ibc/tree/master/spec/app/ics-020-fungible-token-transfer#forwards-compatibility
-        Some(Version::ics20())
+        Some(Version::ics20(1))
     } else {
         None
     }

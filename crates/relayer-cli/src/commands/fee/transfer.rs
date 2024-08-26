@@ -244,11 +244,11 @@ pub struct FeeTransferOptions {
 
 impl From<FeeTransferOptions> for TransferOptions {
     fn from(f: FeeTransferOptions) -> Self {
+        let tokens = vec![(f.amount, f.denom)];
         TransferOptions {
             src_port_id: f.src_port_id,
             src_channel_id: f.src_channel_id,
-            amount: f.amount,
-            denom: f.denom,
+            tokens,
             receiver: f.receiver,
             timeout_height_offset: f.timeout_height_offset,
             timeout_duration: f.timeout_duration,

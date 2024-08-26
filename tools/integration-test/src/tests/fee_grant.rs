@@ -123,11 +123,10 @@ impl BinaryChannelTest for FeeGrantTest {
         let md: MonoTagged<ChainA, &ChainDriver> = MonoTagged::new(&modified_driver);
 
         md.ibc_transfer_token(
-            &channels.port_a.as_ref(),
-            &channels.channel_id_a.as_ref(),
+            &channels,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(a_to_b_amount).as_ref(),
+            &vec![denom_a.with_amount(a_to_b_amount).as_ref()],
         )?;
 
         thread::sleep(Duration::from_secs(10));
@@ -239,11 +238,10 @@ impl BinaryChannelTest for NoFeeGrantTest {
         )?;
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channels.port_a.as_ref(),
-            &channels.channel_id_a.as_ref(),
+            &channels,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(a_to_b_amount).as_ref(),
+            &vec![denom_a.with_amount(a_to_b_amount).as_ref()],
         )?;
 
         thread::sleep(Duration::from_secs(10));

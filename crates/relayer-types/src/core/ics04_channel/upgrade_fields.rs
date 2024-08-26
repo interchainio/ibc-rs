@@ -82,7 +82,7 @@ pub mod test_util {
         RawUpgradeFields {
             ordering: 1,
             connection_hops: vec![],
-            version: Version::ics20_with_fee().to_string(),
+            version: Version::ics20_with_fee(1).to_string(),
         }
     }
 }

@@ -1,23 +1,17 @@
 use tendermint::merkle::proof::ProofOps as TendermintProof;
 
-use ibc_proto::ibc::core::commitment::v1::MerklePath;
 use ibc_proto::ibc::core::commitment::v1::MerkleProof as RawMerkleProof;
 use ibc_proto::ibc::core::commitment::v1::MerkleRoot;
+use ibc_proto::ibc::core::commitment::v2::MerklePath;
 use ics23::commitment_proof::Proof;
 use ics23::{
     calculate_existence_root, verify_membership, verify_non_membership, CommitmentProof,
     NonExistenceProof,
 };
 
-use crate::core::ics23_commitment::commitment::{CommitmentPrefix, CommitmentRoot};
+use crate::core::ics23_commitment::commitment::CommitmentRoot;
 use crate::core::ics23_commitment::error::Error;
 use crate::core::ics23_commitment::specs::ProofSpecs;
-
-pub fn apply_prefix(prefix: &CommitmentPrefix, mut path: Vec<String>) -> MerklePath {
-    let mut key_path: Vec<String> = vec![format!("{prefix:?}")];
-    key_path.append(&mut path);
-    MerklePath { key_path }
-}
 
 impl From<CommitmentRoot> for MerkleRoot {
     fn from(root: CommitmentRoot) -> Self {
@@ -94,11 +88,7 @@ impl MerkleProof {
                             .map_err(|_| Error::invalid_merkle_proof())?;
 
                     if !verify_membership::<ics23::HostFunctionsManager>(
-                        proof,
-                        spec,
-                        &subroot,
-                        key.as_bytes(),
-                        &value,
+                        proof, spec, &subroot, key, &value,
                     ) {
                         return Err(Error::verification_failure());
                     }
@@ -154,12 +144,8 @@ impl MerkleProof {
             Some(Proof::Nonexist(non_existence_proof)) => {
                 let subroot = calculate_non_existence_root(non_existence_proof)?;
 
-                if !verify_non_membership::<ics23::HostFunctionsManager>(
-                    proof,
-                    spec,
-                    &subroot,
-                    key.as_bytes(),
-                ) {
+                if !verify_non_membership::<ics23::HostFunctionsManager>(proof, spec, &subroot, key)
+                {
                     return Err(Error::verification_failure());
                 }
 

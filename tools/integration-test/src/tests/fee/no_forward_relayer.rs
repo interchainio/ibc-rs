@@ -33,7 +33,7 @@ impl TestOverrides for NoForwardRelayerTest {
     }
 
     fn channel_version(&self) -> Version {
-        Version::ics20_with_fee()
+        Version::ics20_with_fee(1)
     }
 }
 
@@ -43,7 +43,7 @@ impl TestOverrides for InvalidForwardRelayerTest {
     }
 
     fn channel_version(&self) -> Version {
-        Version::ics20_with_fee()
+        Version::ics20_with_fee(1)
     }
 }
 
@@ -59,9 +59,6 @@ impl BinaryChannelTest for NoForwardRelayerTest {
         let chain_driver_b = chains.node_b.chain_driver();
 
         let denom_a = chains.node_a.denom();
-
-        let port_a = channel.port_a.as_ref();
-        let channel_id_a = channel.channel_id_a.as_ref();
 
         let wallets_a = chains.node_a.wallets();
         let wallets_b = chains.node_b.wallets();
@@ -81,11 +78,10 @@ impl BinaryChannelTest for NoForwardRelayerTest {
         let timeout_fee = random_u128_range(100, 200);
 
         chain_driver_a.ibc_token_transfer_with_fee(
-            &port_a,
-            &channel_id_a,
+            &channel,
             &user_a,
             &user_b.address(),
-            &denom_a.with_amount(send_amount).as_ref(),
+            &vec![denom_a.with_amount(send_amount).as_ref()],
             &denom_a.with_amount(receive_fee).as_ref(),
             &denom_a.with_amount(ack_fee).as_ref(),
             &denom_a.with_amount(timeout_fee).as_ref(),
@@ -132,10 +128,8 @@ impl BinaryChannelTest for InvalidForwardRelayerTest {
 
         let denom_a = chains.node_a.denom();
 
-        let port_a = channel.port_a.as_ref();
         let port_b = channel.port_b.as_ref();
 
-        let channel_id_a = channel.channel_id_a.as_ref();
         let channel_id_b = channel.channel_id_b.as_ref();
 
         let wallets_a = chains.node_a.wallets();
@@ -167,11 +161,10 @@ impl BinaryChannelTest for InvalidForwardRelayerTest {
         )?;
 
         chain_driver_a.ibc_token_transfer_with_fee(
-            &port_a,
-            &channel_id_a,
+            &channel,
             &user_a,
             &user_b.address(),
-            &denom_a.with_amount(send_amount).as_ref(),
+            &vec![denom_a.with_amount(send_amount).as_ref()],
             &denom_a.with_amount(receive_fee).as_ref(),
             &denom_a.with_amount(ack_fee).as_ref(),
             &denom_a.with_amount(timeout_fee).as_ref(),

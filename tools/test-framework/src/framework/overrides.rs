@@ -146,7 +146,7 @@ pub trait TestOverrides {
        Implemented for [`ChannelVersionOverride`].
     */
     fn channel_version(&self) -> Version {
-        Version::ics20()
+        Version::ics20(1)
     }
 
     fn topology(&self) -> Option<TopologyType> {

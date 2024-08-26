@@ -54,10 +54,18 @@ pub fn bootstrap_single_node(
         Denom::base("samoleans")
     };
 
+    let second_denom = if use_random_id {
+        Denom::base(&format!("coinv2{:x}", random_u32()))
+    } else {
+        Denom::base("samoleansv2")
+    };
+
     // Evmos requires of at least 1_000_000_000_000_000_000 or else there will be the
     // error `error during handshake: error on replay: validator set is nil in genesis and still empty after InitChain`
     // when running `evmosd start`.
     let initial_amount = random_u128_range(1_000_000_000_000_000_000, 2_000_000_000_000_000_000);
+    let second_initial_amount =
+        random_u128_range(1_000_000_000_000_000_000, 2_000_000_000_000_000_000);
 
     let initial_native_token = Token::new(native_denom, initial_amount);
     let additional_native_token = initial_native_token
@@ -68,6 +76,7 @@ pub fn bootstrap_single_node(
             native_token
         )))?;
     let initial_coin = Token::new(denom.clone(), initial_amount);
+    let second_initial_coin = Token::new(second_denom.clone(), second_initial_amount);
 
     let chain_driver = builder.new_chain(prefix, use_random_id, chain_number)?;
 
@@ -85,11 +94,20 @@ pub fn bootstrap_single_node(
 
     chain_driver.add_genesis_validator(&validator.id, &initial_native_token)?;
 
-    chain_driver.add_genesis_account(&user1.address, &[&initial_native_token, &initial_coin])?;
+    chain_driver.add_genesis_account(
+        &user1.address,
+        &[&initial_native_token, &initial_coin, &second_initial_coin],
+    )?;
 
-    chain_driver.add_genesis_account(&user2.address, &[&initial_native_token, &initial_coin])?;
+    chain_driver.add_genesis_account(
+        &user2.address,
+        &[&initial_native_token, &initial_coin, &second_initial_coin],
+    )?;
 
-    chain_driver.add_genesis_account(&relayer.address, &[&initial_native_token, &initial_coin])?;
+    chain_driver.add_genesis_account(
+        &relayer.address,
+        &[&initial_native_token, &initial_coin, &second_initial_coin],
+    )?;
 
     chain_driver.collect_gen_txs()?;
 
@@ -154,6 +172,7 @@ pub fn bootstrap_single_node(
     let node = FullNode {
         chain_driver,
         denom,
+        second_denom,
         wallets,
         process: Arc::new(RwLock::new(process)),
     };

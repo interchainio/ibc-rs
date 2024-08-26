@@ -1,11 +1,14 @@
 use alloc::collections::BTreeMap as HashMap;
 use alloc::collections::VecDeque;
 use ibc_relayer_types::core::ics04_channel::packet::Sequence;
+use ibc_relayer_types::core::ics04_channel::version::Version;
+use serde_json::Error;
 use std::ops::Sub;
 use std::time::{Duration, Instant};
 
 use ibc_proto::google::protobuf::Any;
 use ibc_proto::ibc::applications::transfer::v2::FungibleTokenPacketData as RawPacketData;
+use ibc_proto::ibc::applications::transfer::v2::FungibleTokenPacketDataV2 as RawPacketDataV2;
 use itertools::Itertools;
 use tracing::{debug, error, info, span, trace, warn, Level};
 
@@ -581,12 +584,14 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> RelayPath<ChainA, ChainB> {
             trace!(event = %event_with_height, "processing event");
 
             if let Some(packet) = event_with_height.event.packet() {
+                let channel_version = self.channel().dst_version();
                 // If the event is a ICS-04 packet event, and the packet contains ICS-20
                 // packet data, check that the ICS-20 fields are within the configured limits.
                 if !check_ics20_fields_size(
                     &packet.data,
                     self.max_memo_size,
                     self.max_receiver_size,
+                    channel_version,
                 ) {
                     telemetry!(
                         filtered_packets,
@@ -1980,12 +1985,16 @@ fn check_ics20_fields_size(
     data: &[u8],
     memo_limit: Ics20FieldSizeLimit,
     receiver_limit: Ics20FieldSizeLimit,
+    maybe_channel_version: Option<&Version>,
 ) -> bool {
-    match serde_json::from_slice::<RawPacketData>(data) {
-        Ok(packet_data) => {
+    let channel_version = maybe_channel_version
+        .cloned()
+        .unwrap_or_else(|| Version::ics20(1));
+    match extract_memo_and_receiver(&channel_version, data) {
+        Ok((memo, receiver)) => {
             match (
-                memo_limit.check_field_size(&packet_data.memo),
-                receiver_limit.check_field_size(&packet_data.receiver),
+                memo_limit.check_field_size(&memo),
+                receiver_limit.check_field_size(&receiver),
             ) {
                 (ValidationResult::Valid, ValidationResult::Valid) => true,
 
@@ -2002,6 +2011,23 @@ fn check_ics20_fields_size(
             trace!("failed to decode ICS20 packet data with error `{e}`");
 
             true
+        }
+    }
+}
+
+fn extract_memo_and_receiver(
+    channel_version: &Version,
+    data: &[u8],
+) -> Result<(String, String), Error> {
+    if channel_version.is_ics20_v2() {
+        match serde_json::from_slice::<RawPacketDataV2>(data) {
+            Ok(packet_data) => Ok((packet_data.memo, packet_data.receiver)),
+            Err(e) => Err(e),
+        }
+    } else {
+        match serde_json::from_slice::<RawPacketData>(data) {
+            Ok(packet_data) => Ok((packet_data.memo, packet_data.receiver)),
+            Err(e) => Err(e),
         }
     }
 }

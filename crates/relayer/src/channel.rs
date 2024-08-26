@@ -354,7 +354,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> Channel<ChainA, ChainB> {
                 a_connection_id.clone(),
                 channel.src_port_id.clone(),
                 Some(channel.src_channel_id.clone()),
-                None,
+                Some(a_channel.version.clone()),
             ),
             b_side: ChannelSide::new(
                 counterparty_chain.clone(),
@@ -362,7 +362,7 @@ impl<ChainA: ChainHandle, ChainB: ChainHandle> Channel<ChainA, ChainB> {
                 b_connection_id.clone(),
                 a_channel.remote.port_id.clone(),
                 a_channel.remote.channel_id.clone(),
-                None,
+                Some(a_channel.version.clone()),
             ),
             connection_delay: a_connection.delay_period(),
         };

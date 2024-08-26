@@ -66,13 +66,20 @@ impl BinaryChannelTest for SequentialCommitTest {
 
         {
             let denom_a = chains.node_a.denom();
+            let channel_version = channel.channel.dst_version().ok_or_else(|| {
+                Error::generic(eyre!(
+                    "failed to retrieve channel version for channel `{:#?}`",
+                    channel.channel.dst_channel_id()
+                ))
+            })?;
 
             let transfer_message = build_transfer_message(
                 &channel.port_a.as_ref(),
                 &channel.channel_id_a.as_ref(),
+                channel_version,
                 &wallet_a.as_ref(),
                 &wallet_b.address(),
-                &denom_a.with_amount(100u64).as_ref(),
+                &vec![denom_a.with_amount(100u64).as_ref()],
                 Duration::from_secs(30),
                 None,
             )?;
@@ -109,13 +116,21 @@ impl BinaryChannelTest for SequentialCommitTest {
 
         {
             let denom_b = chains.node_b.denom();
+            let flipped_channel = channel.channel.flipped().clone();
+            let channel_version = flipped_channel.dst_version().ok_or_else(|| {
+                Error::generic(eyre!(
+                    "failed to retrieve channel version for channel `{:#?}`",
+                    channel.channel.dst_channel_id()
+                ))
+            })?;
 
             let transfer_message = build_transfer_message(
                 &channel.port_b.as_ref(),
                 &channel.channel_id_b.as_ref(),
+                channel_version,
                 &wallet_b.as_ref(),
                 &wallet_a.address(),
-                &denom_b.with_amount(100u64).as_ref(),
+                &vec![denom_b.with_amount(100u64).as_ref()],
                 Duration::from_secs(30),
                 None,
             )?;

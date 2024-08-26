@@ -1,13 +1,17 @@
+use ibc_relayer::chain::requests::QueryHeight;
+use ibc_relayer::channel::Channel;
 use ibc_relayer::config::{self, ModeConfig};
-
+use ibc_relayer::connection::Connection;
+use ibc_relayer::object::Channel as ObjectChannel;
 use ibc_test_framework::prelude::*;
 use ibc_test_framework::relayer::channel::{assert_eventually_channel_established, init_channel};
 use ibc_test_framework::relayer::connection::{
     assert_eventually_connection_established, init_connection,
 };
+use ibc_test_framework::types::binary::client::ClientIdPair;
 
 #[test]
-fn test_supervisor1() -> Result<(), Error> {
+fn test_supervisor() -> Result<(), Error> {
     run_binary_chain_test(&SupervisorTest)
 }
 
@@ -59,12 +63,36 @@ impl BinaryChainTest for SupervisorTest {
             MonoTagged::new(Denom::base(config.native_token(0)));
         let fee_denom_b: MonoTagged<ChainB, Denom> =
             MonoTagged::new(Denom::base(config.native_token(1)));
-        let (connection_id_b, _) = init_connection(
+        let (connection_id_b, connection) = init_connection(
             &chains.handle_a,
             &chains.handle_b,
             &chains.foreign_clients.client_id_a(),
             &chains.foreign_clients.client_id_b(),
         )?;
+
+        let connection_a_to_b = Connection::new(
+            chains.foreign_clients.clone().client_b_to_a,
+            chains.foreign_clients.clone().client_a_to_b,
+            Default::default(),
+        )?;
+
+        let client_id_pair = ClientIdPair::new(
+            chains.foreign_clients.client_id_a().cloned(),
+            chains.foreign_clients.client_id_b().cloned(),
+        );
+
+        let connection_id_a: DualTagged<ChainA, ChainB, ConnectionId> =
+            DualTagged::new(connection.a_connection_id().ok_or_else(|| {
+                Error::generic(eyre!("failed to retrieve connection ID for A side"))
+            })?)
+            .cloned();
+
+        let connected_connection: ConnectedConnection<ChainA, ChainB> = ConnectedConnection {
+            client_ids: client_id_pair,
+            connection: connection_a_to_b.clone(),
+            connection_id_a,
+            connection_id_b: connection_id_b.clone(),
+        };
 
         let connection_id_a = assert_eventually_connection_established(
             &chains.handle_b,
@@ -92,6 +120,27 @@ impl BinaryChainTest for SupervisorTest {
             &channel_id_b.as_ref(),
             &port_b.as_ref(),
         )?;
+
+        let (channel, _) = Channel::restore_from_state(
+            chains.handle_a.clone(),
+            chains.handle_b.clone(),
+            ObjectChannel {
+                dst_chain_id: chains.handle_b().id(),
+                src_chain_id: chains.handle_a().id(),
+                src_channel_id: channel_id_a.0.clone(),
+                src_port_id: port_a.0.clone(),
+            },
+            QueryHeight::Latest,
+        )?;
+
+        let connected_channel = ConnectedChannel {
+            connection: connected_connection,
+            channel: channel.clone(),
+            channel_id_a,
+            channel_id_b: channel_id_b.clone(),
+            port_a: port_a.clone(),
+            port_b: port_b.clone(),
+        };
 
         let denom_a = chains.node_a.denom();
 
@@ -135,11 +184,10 @@ impl BinaryChainTest for SupervisorTest {
         );
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &port_a.as_ref(),
-            &channel_id_a.as_ref(),
+            &connected_channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(1000u64).as_ref(),
+            &vec![denom_a.with_amount(1000u64).as_ref()],
         )?;
 
         // During the test, you should see error logs showing "account sequence mismatch".

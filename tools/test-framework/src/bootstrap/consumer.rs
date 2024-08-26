@@ -27,7 +27,11 @@ pub fn bootstrap_consumer_node(
 
     let denom = Denom::base("samoleans");
 
+    let second_denom = Denom::base("samoleansv2");
+
     let initial_amount = random_u128_range(1_000_000_000_000_000_000, 2_000_000_000_000_000_000);
+    let second_initial_amount =
+        random_u128_range(1_000_000_000_000_000_000, 2_000_000_000_000_000_000);
 
     let initial_stake = Token::new(stake_denom, initial_amount);
     let additional_initial_stake = initial_stake
@@ -38,6 +42,7 @@ pub fn bootstrap_consumer_node(
         )))?;
 
     let initial_coin = Token::new(denom.clone(), initial_amount);
+    let second_initial_coin = Token::new(second_denom.clone(), second_initial_amount);
     let chain_driver = builder.new_chain(prefix, false, chain_number)?;
 
     chain_driver.initialize()?;
@@ -48,9 +53,18 @@ pub fn bootstrap_consumer_node(
     let user2 = chain_driver.add_wallet("user2")?;
 
     chain_driver.add_genesis_account(&validator.address, &[&additional_initial_stake])?;
-    chain_driver.add_genesis_account(&relayer.address, &[&initial_stake, &initial_coin])?;
-    chain_driver.add_genesis_account(&user1.address, &[&initial_stake, &initial_coin])?;
-    chain_driver.add_genesis_account(&user2.address, &[&initial_stake, &initial_coin])?;
+    chain_driver.add_genesis_account(
+        &relayer.address,
+        &[&initial_stake, &initial_coin, &second_initial_coin],
+    )?;
+    chain_driver.add_genesis_account(
+        &user1.address,
+        &[&initial_stake, &initial_coin, &second_initial_coin],
+    )?;
+    chain_driver.add_genesis_account(
+        &user2.address,
+        &[&initial_stake, &initial_coin, &second_initial_coin],
+    )?;
 
     // Wait for the consumer chain to be initialized before querying the genesis
     thread::sleep(Duration::from_secs(30));
@@ -136,6 +150,7 @@ pub fn bootstrap_consumer_node(
     let node = FullNode {
         chain_driver,
         denom,
+        second_denom,
         wallets,
         process: Arc::new(RwLock::new(process)),
     };

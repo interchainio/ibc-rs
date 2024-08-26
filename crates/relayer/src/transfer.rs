@@ -1,3 +1,4 @@
+use ibc_relayer_types::core::ics04_channel::version::Version;
 use ibc_relayer_types::signer::SignerError;
 use std::ops::Add;
 use std::str::FromStr;
@@ -8,7 +9,9 @@ use flex_error::{define_error, DetailOnly};
 use ibc_proto::cosmos::base::v1beta1::Coin;
 use ibc_proto::google::protobuf::Any;
 use ibc_relayer_types::applications::transfer::error::Error as Ics20Error;
-use ibc_relayer_types::applications::transfer::msgs::transfer::MsgTransfer;
+use ibc_relayer_types::applications::transfer::msgs::transfer::{
+    MsgTransfer, MsgTransferV1, MsgTransferV2,
+};
 use ibc_relayer_types::applications::transfer::Amount;
 use ibc_relayer_types::core::ics04_channel::timeout::TimeoutHeight;
 use ibc_relayer_types::core::ics24_host::identifier::{ChainId, ChannelId, PortId};
@@ -19,6 +22,7 @@ use ibc_relayer_types::tx_msg::Msg;
 
 use crate::chain::endpoint::ChainStatus;
 use crate::chain::handle::ChainHandle;
+use crate::chain::requests::{IncludeProof, QueryChannelRequest, QueryHeight};
 use crate::chain::tracking::TrackedMsgs;
 use crate::error::Error;
 use crate::event::IbcEventWithHeight;
@@ -120,8 +124,7 @@ impl TransferTimeout {
 pub struct TransferOptions {
     pub src_port_id: PortId,
     pub src_channel_id: ChannelId,
-    pub amount: Amount,
-    pub denom: String,
+    pub tokens: Vec<(Amount, String)>,
     pub receiver: Option<String>,
     pub timeout_height_offset: u64,
     pub timeout_duration: Duration,
@@ -132,29 +135,55 @@ pub struct TransferOptions {
 pub fn build_transfer_message(
     src_port_id: PortId,
     src_channel_id: ChannelId,
-    amount: Amount,
-    denom: String,
+    channel_version: Version,
+    tokens: Vec<(Amount, String)>,
     sender: Signer,
     receiver: Signer,
     timeout_height: TimeoutHeight,
     timeout_timestamp: Timestamp,
     memo: Option<String>,
 ) -> Any {
-    let msg = MsgTransfer {
-        source_port: src_port_id,
-        source_channel: src_channel_id,
-        token: Coin {
-            denom,
-            amount: amount.to_string(),
-        },
-        sender,
-        receiver,
-        timeout_height,
-        timeout_timestamp,
-        memo,
-    };
+    if channel_version.is_ics20_v2() {
+        let tokens = tokens
+            .into_iter()
+            .map(|(amount, denom)| Coin {
+                denom,
+                amount: amount.to_string(),
+            })
+            .collect();
+        let msg = MsgTransferV2 {
+            source_port: src_port_id,
+            source_channel: src_channel_id,
+            sender,
+            receiver,
+            timeout_height,
+            timeout_timestamp,
+            memo,
+            tokens,
+        };
 
-    msg.to_any()
+        MsgTransfer::V2(msg).to_any()
+    } else {
+        let token = tokens
+            .first()
+            .map(|(amount, denom)| Coin {
+                denom: denom.to_string(),
+                amount: amount.to_string(),
+            })
+            .unwrap();
+        let msg = MsgTransferV1 {
+            source_port: src_port_id,
+            source_channel: src_channel_id,
+            token,
+            sender,
+            receiver,
+            timeout_height,
+            timeout_timestamp,
+            memo,
+        };
+
+        MsgTransfer::V1(msg).to_any()
+    }
 }
 
 pub fn build_transfer_messages<SrcChain: ChainHandle, DstChain: ChainHandle>(
@@ -179,11 +208,22 @@ pub fn build_transfer_messages<SrcChain: ChainHandle, DstChain: ChainHandle>(
         &destination_chain_status,
     )?;
 
+    let (channel, _) = src_chain
+        .query_channel(
+            QueryChannelRequest {
+                port_id: opts.src_port_id.clone(),
+                channel_id: opts.src_channel_id.clone(),
+                height: QueryHeight::Latest,
+            },
+            IncludeProof::No,
+        )
+        .map_err(TransferError::relayer)?;
+
     let message = build_transfer_message(
         opts.src_port_id.clone(),
         opts.src_channel_id.clone(),
-        opts.amount,
-        opts.denom.clone(),
+        channel.version,
+        opts.tokens.clone(),
         sender,
         receiver,
         timeout.timeout_height,

@@ -121,11 +121,10 @@ impl NaryChannelTest<4> for IbcForwardHopTransferTest {
         node_a
             .chain_driver()
             .ibc_transfer_token_with_memo_and_timeout(
-                &channel_a_to_b.port_a.as_ref(),
-                &channel_a_to_b.channel_id_a.as_ref(),
+                &channel_a_to_b,
                 &wallet_a,
                 &wallet_b.address(),
-                &denom_a.with_amount(a_to_d_amount).as_ref(),
+                &vec![denom_a.with_amount(a_to_d_amount).as_ref()],
                 Some(memo),
                 None,
             )?;
@@ -242,11 +241,10 @@ impl NaryChannelTest<4> for AtomicIbcForwardHopTransferTest {
         node_a
             .chain_driver()
             .ibc_transfer_token_with_memo_and_timeout(
-                &channel_a_to_b.port_a.as_ref(),
-                &channel_a_to_b.channel_id_a.as_ref(),
+                &channel_a_to_b,
                 &wallet_a,
                 &wallet_b.address(),
-                &denom_a.with_amount(a_to_d_amount).as_ref(),
+                &vec![denom_a.with_amount(a_to_d_amount).as_ref()],
                 Some(memo),
                 None,
             )?;

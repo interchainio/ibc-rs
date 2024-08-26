@@ -92,11 +92,10 @@ impl BinaryChannelTest for DisabledClearPacketTest {
         );
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &amount1.as_ref(),
+            &vec![amount1.as_ref()],
         )?;
 
         sleep(Duration::from_secs(1));
@@ -113,11 +112,10 @@ impl BinaryChannelTest for DisabledClearPacketTest {
             );
 
             chains.node_a.chain_driver().ibc_transfer_token(
-                &channel.port_a.as_ref(),
-                &channel.channel_id_a.as_ref(),
+                &channel,
                 &wallet_a.as_ref(),
                 &wallet_b.address(),
-                &amount2.as_ref(),
+                &vec![amount2.as_ref()],
             )?;
 
             sleep(Duration::from_secs(1));
@@ -182,11 +180,10 @@ impl BinaryChannelTest for ClearPacketRecoveryTest {
         let amount1 = random_u128_range(1000, 5000);
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(amount1).as_ref(),
+            &vec![denom_a.with_amount(amount1).as_ref()],
         )?;
 
         let denom_b2 = derive_ibc_denom(
@@ -246,11 +243,10 @@ impl BinaryChannelTest for ClearPacketNoScanTest {
             .query_balance(&wallet_a.address(), &denom_a)?;
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(amount1).as_ref(),
+            &vec![denom_a.with_amount(amount1).as_ref()],
         )?;
 
         let denom_b2 = derive_ibc_denom(
@@ -366,11 +362,10 @@ impl BinaryChannelTest for ClearPacketOverrideTest {
             .query_balance(&wallet_a.address(), &denom_a)?;
 
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(amount1).as_ref(),
+            &vec![denom_a.with_amount(amount1).as_ref()],
         )?;
 
         let denom_b2 = derive_ibc_denom(
@@ -467,11 +462,10 @@ impl BinaryChannelTest for ClearPacketSequencesTest {
         info!("Performing {NUM_TRANSFERS} IBC transfer, which should *not* be relayed");
 
         chains.node_a.chain_driver().ibc_transfer_token_multiple(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &amount.as_ref(),
+            &vec![amount.as_ref()],
             NUM_TRANSFERS,
             None,
         )?;
@@ -644,11 +638,10 @@ impl BinaryChannelTest for LimitedClearPacketTest {
         info!("Performing {num_transfers}  IBC transfers with amount {amount}, for a total of {sent_amount}");
 
         chains.node_a.chain_driver().ibc_transfer_token_multiple(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &amount.as_ref(),
+            &vec![amount.as_ref()],
             70,
             None,
         )?;

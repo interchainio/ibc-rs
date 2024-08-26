@@ -17,6 +17,10 @@ use crate::core::ics03_connection::msgs::conn_open_confirm::MsgConnectionOpenCon
 use crate::core::ics03_connection::msgs::conn_open_init::MsgConnectionOpenInit;
 use crate::core::ics03_connection::msgs::conn_open_try::MsgConnectionOpenTry;
 
+// TODO: ibc-go v9 deprecated multiple fields in Connection Open Ack.
+// Keep the fields to be compatible with previous versions until all
+// previous versions get to end-of-life.
+#[allow(deprecated)]
 pub mod conn_open_ack;
 pub mod conn_open_confirm;
 pub mod conn_open_init;

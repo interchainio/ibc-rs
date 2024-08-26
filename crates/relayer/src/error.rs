@@ -594,6 +594,11 @@ define_error! {
             [ TendermintRpcError ]
             |_| { "Invalid CompatMode queried from chain and no `compat_mode` configured in Hermes. This can be fixed by specifying a `compat_mode` in Hermes config.toml" },
 
+        FailedAbciQuery
+            { path: String }
+            [ TendermintRpcError ]
+            |e| { format_args!("ABCI query with path `{}` failed", e.path) },
+
         HttpRequest
             [ TraceError<reqwest::Error> ]
             |_| { "HTTP request error" },
@@ -633,6 +638,10 @@ define_error! {
         InvalidChannelString
             { channel: String }
             |e| { format!("invalid channel string {}", e.channel) },
+
+        UnknownIcs20Version
+            { version_str: String }
+            |e| { format!("unknown ICS20 version string {}", e.version_str) },
     }
 }
 

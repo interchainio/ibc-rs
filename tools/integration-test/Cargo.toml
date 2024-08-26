@@ -50,6 +50,7 @@ new-register-interchain-account = []
 authz                           = []
 benchmark                       = []
 no-denom-trace                  = []
+ics20-v2                        = []
 
 [[bin]]
 name = "test_setup_with_binary_channel"

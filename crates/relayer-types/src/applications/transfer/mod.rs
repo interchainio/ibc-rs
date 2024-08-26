@@ -10,6 +10,8 @@ pub mod error;
 pub mod events;
 pub mod msgs;
 pub mod packet;
+pub mod v1;
+pub mod v2;
 
 pub use amount::*;
 pub use coin::*;
@@ -23,4 +25,4 @@ pub const MODULE_ID_STR: &str = "transfer";
 pub const PORT_ID_STR: &str = "transfer";
 
 /// ICS20 application current version.
-pub const VERSION: &str = "ics20-1";
+pub const VERSION_PREFIX: &str = "ics20";

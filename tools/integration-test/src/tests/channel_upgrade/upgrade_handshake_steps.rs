@@ -137,7 +137,7 @@ impl BinaryChannelTest for ChannelUpgradeManualHandshake {
         let old_connection_hops_b = channel_end_b.connection_hops;
 
         let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let old_attrs = ChannelUpgradableAttributes::new(
             old_version.clone(),
@@ -304,7 +304,7 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFromTry {
         let old_connection_hops_b = channel_end_b.connection_hops;
 
         let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let old_attrs = ChannelUpgradableAttributes::new(
             old_version.clone(),
@@ -420,7 +420,7 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFromAck {
         let old_connection_hops_b = channel_end_b.connection_hops;
 
         let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let old_attrs = ChannelUpgradableAttributes::new(
             old_version.clone(),
@@ -551,7 +551,7 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeFromConfirm {
         let old_connection_hops_b = channel_end_b.connection_hops;
 
         let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let old_attrs = ChannelUpgradableAttributes::new(
             old_version.clone(),
@@ -706,7 +706,7 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeInitiateNewUpgrade {
         let pre_upgrade_1_connection_hops_b = channel_end_b.connection_hops.clone();
 
         let channel = channels.channel;
-        let post_upgrade_1_version = Version::ics20_with_fee();
+        let post_upgrade_1_version = Version::ics20_with_fee(1);
 
         let pre_upgrade_1_attrs = ChannelUpgradableAttributes::new(
             pre_upgrade_1_version.clone(),
@@ -798,7 +798,7 @@ impl BinaryChannelTest for ChannelUpgradeHandshakeInitiateNewUpgrade {
         let pre_upgrade_2_ordering = channel_end_a.ordering;
         let pre_upgrade_2_connection_hops_b = channel_end_b.connection_hops.clone();
 
-        let post_upgrade_2_version = Version::ics20();
+        let post_upgrade_2_version = Version::ics20(1);
 
         info!("Will initialise on chain B upgrade handshake with governance proposal...");
 

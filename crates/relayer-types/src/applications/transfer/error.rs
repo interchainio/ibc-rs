@@ -9,7 +9,6 @@ use uint::FromDecStrErr;
 
 use crate::core::ics04_channel::channel::Ordering;
 use crate::core::ics04_channel::error as channel_error;
-use crate::core::ics04_channel::version::Version;
 use crate::core::ics24_host::error::ValidationError;
 use crate::core::ics24_host::identifier::{ChannelId, PortId};
 use crate::signer::SignerError;
@@ -92,14 +91,6 @@ define_error! {
         ChannelNotUnordered
             { order: Ordering }
             | e | { format_args!("expected '{0}' channel, got '{1}'", Ordering::Unordered, e.order) },
-
-        InvalidVersion
-            { version: Version }
-            | e | { format_args!("expected version '{0}', got '{1}'", Version::ics20(), e.version) },
-
-        InvalidCounterpartyVersion
-            { version: Version }
-            | e | { format_args!("expected counterparty version '{0}', got '{1}'", Version::ics20(), e.version) },
 
         CantCloseChannel
             | _ | { "channel cannot be closed" },

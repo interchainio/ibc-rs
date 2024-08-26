@@ -90,9 +90,6 @@ impl BinaryChannelTest for ChannelUpgradeICS29 {
 
         let denom_a = chains.node_a.denom();
 
-        let port_a = channels.port_a.as_ref();
-        let channel_id_a = channels.channel_id_a.as_ref();
-
         let wallets_a = chains.node_a.wallets();
         let wallets_b = chains.node_b.wallets();
 
@@ -114,12 +111,13 @@ impl BinaryChannelTest for ChannelUpgradeICS29 {
 
         let balance_a2 = balance_a1 - total_sent;
 
+        let channel = channels.channel.clone();
+
         let ics29_transfer = chain_driver_a.ibc_token_transfer_with_fee(
-            &port_a,
-            &channel_id_a,
+            &channels,
             &user_a,
             &user_b.address(),
-            &denom_a.with_amount(send_amount).as_ref(),
+            &vec![denom_a.with_amount(send_amount).as_ref()],
             &denom_a.with_amount(receive_fee).as_ref(),
             &denom_a.with_amount(ack_fee).as_ref(),
             &denom_a.with_amount(timeout_fee).as_ref(),
@@ -132,8 +130,7 @@ impl BinaryChannelTest for ChannelUpgradeICS29 {
         let old_connection_hops_a = channel_end_a.connection_hops;
         let old_connection_hops_b = channel_end_b.connection_hops;
 
-        let channel = channels.channel;
-        let new_version = Version::ics20_with_fee();
+        let new_version = Version::ics20_with_fee(1);
 
         let upgraded_attrs = ChannelUpgradableAttributes::new(
             new_version.clone(),
@@ -190,11 +187,10 @@ impl BinaryChannelTest for ChannelUpgradeICS29 {
         }
 
         chain_driver_a.ibc_token_transfer_with_fee(
-            &port_a,
-            &channel_id_a,
+            &channels,
             &user_a,
             &user_b.address(),
-            &denom_a.with_amount(send_amount).as_ref(),
+            &vec![denom_a.with_amount(send_amount).as_ref()],
             &denom_a.with_amount(receive_fee).as_ref(),
             &denom_a.with_amount(ack_fee).as_ref(),
             &denom_a.with_amount(timeout_fee).as_ref(),

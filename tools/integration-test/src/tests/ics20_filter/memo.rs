@@ -56,11 +56,10 @@ impl BinaryChannelTest for IbcMemoFilterTest {
             .node_a
             .chain_driver()
             .ibc_transfer_token_with_memo_and_timeout(
-                &channel.port_a.as_ref(),
-                &channel.channel_id_a.as_ref(),
+                &channel,
                 &wallet_a.as_ref(),
                 &wallet_b.address(),
-                &denom_a.with_amount(a_to_b_amount).as_ref(),
+                &vec![denom_a.with_amount(a_to_b_amount).as_ref()],
                 Some(memo),
                 None,
             )?;
@@ -94,11 +93,10 @@ impl BinaryChannelTest for IbcMemoFilterTest {
             .node_a
             .chain_driver()
             .ibc_transfer_token_with_memo_and_timeout(
-                &channel.port_a.as_ref(),
-                &channel.channel_id_a.as_ref(),
+                &channel,
                 &wallet_a.as_ref(),
                 &wallet_b.address(),
-                &denom_a.with_amount(a_to_b_amount).as_ref(),
+                &vec![denom_a.with_amount(a_to_b_amount).as_ref()],
                 None,
                 None,
             )?;

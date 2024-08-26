@@ -105,11 +105,10 @@ impl BinaryChannelTest for DynamicGasTest {
             .node_a
             .chain_driver()
             .ibc_transfer_token_with_memo_and_timeout(
-                &channel.port_a.as_ref(),
-                &channel.channel_id_a.as_ref(),
+                &channel,
                 &wallet_a.as_ref(),
                 &wallet_b.address(),
-                &denom_a.with_amount(a_to_b_amount).as_ref(),
+                &vec![denom_a.with_amount(a_to_b_amount).as_ref()],
                 Some(memo),
                 None,
             )?;
@@ -159,11 +158,10 @@ impl BinaryChannelTest for DynamicGasTest {
         )?;
 
         chains.node_b.chain_driver().ibc_transfer_token(
-            &channel.port_b.as_ref(),
-            &channel.channel_id_b.as_ref(),
+            &channel.flip(),
             &chains.node_b.wallets().user1(),
             &chains.node_a.wallets().user1().address(),
-            &denom_b.with_amount(b_to_a_amount).as_ref(),
+            &vec![denom_b.with_amount(b_to_a_amount).as_ref()],
         )?;
 
         let tx2_paid_gas_relayer = relayer.with_supervisor(|| {

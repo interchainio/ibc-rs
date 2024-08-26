@@ -105,11 +105,10 @@ impl BinaryChannelTest for OrderedChannelClearTest {
         );
 
         chains.node_a.chain_driver().ibc_transfer_token_multiple(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &token.as_ref(),
+            &vec![token.as_ref()],
             num_msgs,
             None,
         )?;
@@ -245,11 +244,15 @@ impl BinaryChannelTest for OrderedChannelClearEqualCLITest {
             num_msgs
         );
 
+        let tokens = vec![(
+            random_u64_range(1000, 5000).into(),
+            chains.node_a.denom().value().to_string(),
+        )];
+
         let transfer_options = TransferOptions {
             src_port_id: channel.port_a.value().clone(),
             src_channel_id: channel.channel_id_a.value().clone(),
-            amount: random_u64_range(1000, 5000).into(),
-            denom: chains.node_a.denom().value().to_string(),
+            tokens,
             receiver: Some(chains.node_b.wallets().user1().address().value().0.clone()),
             timeout_height_offset: 1000,
             timeout_duration: Duration::from_secs(0),

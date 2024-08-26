@@ -1,10 +1,11 @@
 use eyre::eyre;
 use http::Uri;
 use ibc_relayer::config::default::max_grpc_decoding_size;
+use ibc_relayer::upgrade_chain::UpgradeProposal;
 use prost::Message;
 
 use ibc_proto::cosmos::gov::v1beta1::{query_client::QueryClient, QueryProposalRequest};
-use ibc_proto::ibc::core::client::v1::{MsgIbcSoftwareUpgrade, UpgradeProposal};
+use ibc_proto::ibc::core::client::v1::MsgIbcSoftwareUpgrade;
 use ibc_relayer::error::Error as RelayerError;
 
 use crate::chain::cli::proposal::deposit_proposal;

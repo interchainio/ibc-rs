@@ -201,7 +201,7 @@ impl Default for BootstrapChannelOptions {
     fn default() -> Self {
         Self {
             order: Ordering::Unordered,
-            version: Version::ics20(),
+            version: Version::ics20(1),
             pad_channel_id_a: 0,
             pad_channel_id_b: 1,
         }

@@ -11,3 +11,6 @@ lazy_static     = "1.4.0"
 mdbook-template = "1.1.0"
 regex           = "1"
 walkdir         = "2.3.3"
+
+[patch.crates-io]
+ibc-proto                       = { git = "https://github.com/cosmos/ibc-proto-rs.git", branch = "luca_joss/update-ibc-go-commit" }

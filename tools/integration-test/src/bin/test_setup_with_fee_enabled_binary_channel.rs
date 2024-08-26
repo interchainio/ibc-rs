@@ -59,7 +59,7 @@ impl TestOverrides for Test {
     }
 
     fn channel_version(&self) -> Version {
-        Version::ics20_with_fee()
+        Version::ics20_with_fee(1)
     }
 }
 

@@ -36,12 +36,20 @@ impl BinaryChannelTest for ErrorEventsTest {
 
         let balance_a_amount: u128 = balance_a.value().amount.0.as_u128();
 
+        let channel_version = channel.channel.src_version().ok_or_else(|| {
+            Error::generic(eyre!(
+                "failed to retrieve channel version for channel `{:#?}`",
+                channel.channel.src_channel_id()
+            ))
+        })?;
+
         let transfer_message = build_transfer_message(
             &channel.port_a.as_ref(),
             &channel.channel_id_a.as_ref(),
+            channel_version,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount((balance_a_amount / 3) + 1).as_ref(),
+            &vec![denom_a.with_amount((balance_a_amount / 3) + 1).as_ref()],
             Duration::from_secs(30),
             None,
         )?;

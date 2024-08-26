@@ -7,6 +7,7 @@ use serde_json as json;
 use std::convert::Infallible;
 use std::fmt::{Display, Error as FmtError, Formatter};
 use std::str::FromStr;
+use tracing::debug;
 
 use crate::applications::transfer;
 
@@ -23,14 +24,14 @@ impl Version {
         Self(v)
     }
 
-    pub fn ics20() -> Self {
-        Self::new(transfer::VERSION.to_string())
+    pub fn ics20(version: u64) -> Self {
+        Self::new(format!("{}-{version}", transfer::VERSION_PREFIX))
     }
 
-    pub fn ics20_with_fee() -> Self {
+    pub fn ics20_with_fee(version: u64) -> Self {
         let val = json::json!({
             "fee_version": "ics29-1",
-            "app_version": transfer::VERSION,
+            "app_version": format!("{}-{version}", transfer::VERSION_PREFIX),
         });
 
         Self::new(val.to_string())
@@ -60,6 +61,22 @@ impl Version {
                 Some(fee_version == "ics29-1")
             })
             .unwrap_or(false)
+    }
+
+    pub fn is_ics20_v2(&self) -> bool {
+        match serde_json::from_str::<serde_json::Value>(&self.0) {
+            Ok(json_value) => {
+                let app_version = json_value
+                    .get("app_version")
+                    .and_then(|app_version| app_version.as_str())
+                    .unwrap_or(self.0.as_str());
+                app_version == "ics20-2"
+            }
+            Err(e) => {
+                debug!("failed to deserialise version as JSON will fallback to direct string comparison. Error: {e}");
+                self.0.as_str() == "ics20-2"
+            }
+        }
     }
 }
 
@@ -119,12 +136,12 @@ mod test {
     #[test]
     fn test_ics29_version() {
         {
-            let version = Version::ics20();
+            let version = Version::ics20(1);
             assert!(!version.supports_fee());
         }
 
         {
-            let version = Version::ics20_with_fee();
+            let version = Version::ics20_with_fee(1);
             assert!(version.supports_fee());
         }
     }

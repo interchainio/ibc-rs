@@ -59,11 +59,10 @@ impl BinaryChannelTest for CleanPacketWorkersTest {
 
         // Transfer tokens so that the packet workers are spawned
         chains.node_a.chain_driver().ibc_transfer_token(
-            &channel.port_a.as_ref(),
-            &channel.channel_id_a.as_ref(),
+            &channel,
             &wallet_a.as_ref(),
             &wallet_b.address(),
-            &denom_a.with_amount(amount1).as_ref(),
+            &vec![denom_a.with_amount(amount1).as_ref()],
         )?;
 
         // Assert the packet workers are correctly spawned

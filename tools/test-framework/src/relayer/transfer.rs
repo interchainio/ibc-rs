@@ -6,6 +6,7 @@
 use core::ops::Add;
 use core::time::Duration;
 use eyre::eyre;
+use ibc_relayer::channel::version::Version;
 use ibc_relayer_types::core::ics04_channel::packet::Packet;
 use ibc_relayer_types::events::IbcEvent;
 
@@ -29,9 +30,10 @@ use crate::types::wallet::{Wallet, WalletAddress};
 pub fn build_transfer_message<SrcChain, DstChain>(
     port_id: &TaggedPortIdRef<'_, SrcChain, DstChain>,
     channel_id: &TaggedChannelIdRef<'_, SrcChain, DstChain>,
+    channel_version: &Version,
     sender: &MonoTagged<SrcChain, &Wallet>,
     recipient: &MonoTagged<DstChain, &WalletAddress>,
-    token: &TaggedTokenRef<'_, SrcChain>,
+    tokens: &Vec<TaggedTokenRef<'_, SrcChain>>,
     timeout: Duration,
     memo: Option<String>,
 ) -> Result<Any, Error> {
@@ -52,11 +54,16 @@ pub fn build_transfer_message<SrcChain, DstChain>(
         .parse()
         .map_err(|e| TransferError::token_transfer(Ics20Error::signer(e)))?;
 
+    let raw_tokens = tokens
+        .iter()
+        .map(|t| (t.value().amount, t.value().denom.to_string()))
+        .collect::<Vec<(_, _)>>();
+
     Ok(raw_build_transfer_message(
         (*port_id.value()).clone(),
         (*channel_id.value()).clone(),
-        token.value().amount,
-        token.value().denom.to_string(),
+        channel_version.clone(),
+        raw_tokens,
         sender,
         receiver,
         TimeoutHeight::no_timeout(),
@@ -87,18 +94,20 @@ pub async fn ibc_token_transfer<SrcChain, DstChain>(
     tx_config: &MonoTagged<SrcChain, &TxConfig>,
     port_id: &TaggedPortIdRef<'_, SrcChain, DstChain>,
     channel_id: &TaggedChannelIdRef<'_, SrcChain, DstChain>,
+    channel_version: &Version,
     sender: &MonoTagged<SrcChain, &Wallet>,
     recipient: &MonoTagged<DstChain, &WalletAddress>,
-    token: &TaggedTokenRef<'_, SrcChain>,
+    tokens: &Vec<TaggedTokenRef<'_, SrcChain>>,
     memo: Option<String>,
     timeout: Option<Duration>,
 ) -> Result<Packet, Error> {
     let message = build_transfer_message(
         port_id,
         channel_id,
+        channel_version,
         sender,
         recipient,
-        token,
+        tokens,
         timeout.unwrap_or(Duration::from_secs(60)),
         memo.clone(),
     )?;
@@ -127,9 +136,10 @@ pub async fn batched_ibc_token_transfer<SrcChain, DstChain>(
     tx_config: &MonoTagged<SrcChain, &TxConfig>,
     port_id: &TaggedPortIdRef<'_, SrcChain, DstChain>,
     channel_id: &TaggedChannelIdRef<'_, SrcChain, DstChain>,
+    channel_version: &Version,
     sender: &MonoTagged<SrcChain, &Wallet>,
     recipient: &MonoTagged<DstChain, &WalletAddress>,
-    token: &TaggedTokenRef<'_, SrcChain>,
+    tokens: &Vec<TaggedTokenRef<'_, SrcChain>>,
     num_msgs: usize,
     memo: Option<String>,
 ) -> Result<(), Error> {
@@ -137,9 +147,10 @@ pub async fn batched_ibc_token_transfer<SrcChain, DstChain>(
         build_transfer_message(
             port_id,
             channel_id,
+            channel_version,
             sender,
             recipient,
-            token,
+            tokens,
             Duration::from_secs(60),
             memo.clone(),
         )

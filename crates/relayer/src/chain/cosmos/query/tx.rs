@@ -129,9 +129,15 @@ pub async fn query_packets_from_txs(
     let mut result: Vec<IbcEventWithHeight> = vec![];
 
     for seq in &request.sequences {
-        // Query the latest 10 txs which include the event specified in the query request
+        // Query the latest 100 txs which include the event specified in the query request
         let response = rpc_client
-            .tx_search(packet_query(request, *seq), false, 1, 10, Order::Descending)
+            .tx_search(
+                packet_query(request, *seq),
+                false,
+                1,
+                100,
+                Order::Descending,
+            )
             .await
             .map_err(|e| Error::rpc(rpc_address.clone(), e))?;
 

@@ -34,22 +34,6 @@ pub struct QueryResponse {
 
 pub fn packet_query(request: &QueryPacketEventDataRequest, seq: Sequence) -> Query {
     Query::eq(
-        format!("{}.packet_src_channel", request.event_id.as_str()),
-        request.source_channel_id.to_string(),
-    )
-    .and_eq(
-        format!("{}.packet_src_port", request.event_id.as_str()),
-        request.source_port_id.to_string(),
-    )
-    .and_eq(
-        format!("{}.packet_dst_channel", request.event_id.as_str()),
-        request.destination_channel_id.to_string(),
-    )
-    .and_eq(
-        format!("{}.packet_dst_port", request.event_id.as_str()),
-        request.destination_port_id.to_string(),
-    )
-    .and_eq(
         format!("{}.packet_sequence", request.event_id.as_str()),
         seq.to_string(),
     )

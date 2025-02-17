@@ -103,7 +103,7 @@ mod tests {
     use ibc_relayer_types::core::ics24_host::identifier::{ChainId, ChannelId, PortId};
 
     #[test]
-    fn test_regiser_payee() {
+    fn test_register_payee() {
         assert_eq!(
             RegisterPayeeCmd {
                 chain_id: ChainId::from_string("chain_a"),
@@ -125,7 +125,7 @@ mod tests {
         )
     }
     #[test]
-    fn test_regiser_payee_alias() {
+    fn test_register_payee_alias() {
         assert_eq!(
             RegisterPayeeCmd {
                 chain_id: ChainId::from_string("chain_a"),

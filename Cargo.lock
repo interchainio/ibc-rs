@@ -4526,7 +4526,7 @@ dependencies = [
  "ics23",
  "itertools 0.13.0",
  "num-rational",
- "primitive-types 0.12.2",
+ "primitive-types 0.13.1",
  "prost",
  "regex",
  "serde",

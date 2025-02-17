@@ -265,7 +265,7 @@ impl<Tag, Value> Tagged<Tag, Option<Value>> {
 
 impl<Tag, Value, E> Tagged<Tag, Result<Value, E>> {
     /**
-        Convert a tagged [`Result`] value into an result tagged value.
+        Convert a tagged [`Result`] value into a result tagged value.
 
         Example:
 

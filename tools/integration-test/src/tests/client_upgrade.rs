@@ -88,7 +88,7 @@ impl BinaryChainTest for ClientUpgradeTest {
         ));
         let foreign_clients = chains.clone().foreign_clients;
 
-        // Create and send an chain upgrade proposal
+        // Create and send a chain upgrade proposal
         let opts = create_upgrade_plan(config, &chains, &upgraded_chain_id)?;
 
         build_and_send_ibc_upgrade_proposal(
@@ -249,7 +249,7 @@ impl BinaryChainTest for HeightTooHighClientUpgradeTest {
         ));
         let foreign_clients = chains.clone().foreign_clients;
 
-        // Create and send an chain upgrade proposal
+        // Create and send a chain upgrade proposal
         let opts = create_upgrade_plan(config, &chains, &upgraded_chain_id)?;
 
         build_and_send_ibc_upgrade_proposal(
@@ -447,7 +447,7 @@ fn create_upgrade_plan<ChainA: ChainHandle, ChainB: ChainHandle>(
     let src_client_id = foreign_clients.client_id_b().0.clone();
 
     let gov_account = chains.node_a.chain_driver().query_auth_module("gov")?;
-    // Create and send an chain upgrade proposal
+    // Create and send a chain upgrade proposal
     Ok(UpgradePlanOptions {
         src_client_id,
         amount: MIN_DEPOSIT,

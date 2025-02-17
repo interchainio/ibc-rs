@@ -197,7 +197,7 @@ impl Output {
         Output::with_success().with_result(result)
     }
 
-    /// Quick-access constructor for an output message signalling a error `status`.
+    /// Quick-access constructor for an output message signalling an error `status`.
     pub fn error(msg: impl ToString) -> Self {
         Output::with_error().with_msg(msg)
     }

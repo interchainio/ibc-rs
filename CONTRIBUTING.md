@@ -31,7 +31,7 @@ The Hermes core team is responsible for stewarding this project over time. This 
 
 With that in mind, the core team must balance the potential risks of maintaining 
 any contribution in the long-term against the immediate usefulness or utility 
-that that contribution manifests. 
+that contribution manifests. 
 
 ## Decision Making
 

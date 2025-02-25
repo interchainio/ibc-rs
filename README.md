@@ -125,9 +125,9 @@ Unless required by applicable law or agreed to in writing, software distributed 
 [ibc-proto-rs-repo]: https://github.com/cosmos/ibc-proto-rs
 
 [build-image]: https://github.com/informalsystems/hermes/workflows/Rust/badge.svg
-[build-link]: https://github.com/informalsystems/hermes/actions?query=workflow%3ARust
+[build-link]: https://github.com/informalsystems/hermes/actions/workflows/rust.yml
 [test-image]: https://github.com/informalsystems/hermes/actions/workflows/integration.yaml/badge.svg?branch=master
-[test-link]: https://github.com/informalsystems/hermes/actions?query=workflow%3A%22Integration%22
+[test-link]: https://github.com/informalsystems/hermes/actions/workflows/integration.yaml
 [license-image]: https://img.shields.io/badge/license-Apache_2.0-blue.svg
 [license-link]: https://github.com/informalsystems/hermes/blob/master/LICENSE
 [rustc-image]: https://img.shields.io/badge/rustc-stable-blue.svg

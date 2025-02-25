@@ -217,5 +217,5 @@ conducted extensive experiments to check `IBCSafety` and `IBCDelivery` with TLC 
 
 The specification contains type annotations for the 
 model checker [Apalache](https://github.com/informalsystems/apalache).
-The specification passes the type check using the type checker [Snowcat](https://apalache.informal.systems/docs/apalache/typechecker-snowcat.html) 
+The specification passes the type check using the type checker [Snowcat](https://apalache-mc.org/docs/apalache/typechecker-snowcat.html) 
 integrated in Apalache.  

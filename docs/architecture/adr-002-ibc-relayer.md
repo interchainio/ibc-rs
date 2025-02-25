@@ -149,7 +149,7 @@ tx_confirmation = true
   store_prefix = "ibc"
   client_ids = ["clA1", "clA2"]
   gas = 200000
-  gas_adjustement = 1.3
+  gas_adjustment = 1.3
   gas_price = "0.025stake"
   trusting_period = "336h"
 
@@ -164,7 +164,7 @@ tx_confirmation = true
   store_prefix = "ibc"
   client_ids = ["clB1"]
   gas = 200000
-  gas_adjustement = 1.3
+  gas_adjustment = 1.3
   gas_price = "0.025stake"
   trusting_period = "336h"
 

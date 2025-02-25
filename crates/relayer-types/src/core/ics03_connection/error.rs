@@ -36,11 +36,11 @@ define_error! {
         InvalidConsensusHeight
             {
                 target_height: Height,
-                currrent_height: Height
+                current_height: Height
             }
             | e | {
                 format_args!("consensus height claimed by the client on the other party is too advanced: {0} (host chain current height: {1})",
-                    e.target_height, e.currrent_height)
+                    e.target_height, e.current_height)
             },
 
         StaleConsensusHeight

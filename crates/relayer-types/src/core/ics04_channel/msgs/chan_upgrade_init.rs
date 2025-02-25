@@ -86,7 +86,7 @@ pub mod test_util {
     use crate::core::ics24_host::identifier::{ChannelId, PortId};
     use crate::test_utils::get_dummy_bech32_account;
 
-    /// Returns a dummy `RawMsgChannelUpgadeInit`, for testing only!
+    /// Returns a dummy `RawMsgChannelUpgradeInit`, for testing only!
     pub fn get_dummy_raw_msg_chan_upgrade_init() -> RawMsgChannelUpgradeInit {
         RawMsgChannelUpgradeInit {
             port_id: PortId::default().to_string(),
